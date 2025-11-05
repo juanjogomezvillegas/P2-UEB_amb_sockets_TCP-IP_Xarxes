@@ -1,15 +1,16 @@
-/**************************************************************************/
-/*                                                                        */
-/* L'aplicació UEB amb sockets TCP/IP                                     */
-/* Fitxer serUEB.c que implementa la interfície aplicació-administrador   */
-/* d'un servidor de l'aplicació UEB, sobre la capa d'aplicació de         */
-/* (la part servidora de) UEB (fent crides a la interfície de la part     */
-/* servidora de la capa UEB).                                             */
-/*                                                                        */
-/* Autors:                                                                */
-/* Data:                                                                  */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* L'aplicació UEB amb sockets TCP/IP                                          */
+/* Fitxer serUEB.c que implementa la interfície aplicació-administrador        */
+/* d'un servidor de l'aplicació UEB, sobre la capa d'aplicació de              */
+/* (la part servidora de) UEB (fent crides a la interfície de la part          */
+/* servidora de la capa UEB).                                                  */
+/*                                                                             */
+/* Autors: Juan José Gómez Villegas, u1987338, u1987338@campus.udg.edu, GEINF  */
+/*         Martí Valverde Rodríguez, u1994928, u1994928@campus.udg.edu, GEINF  */ 
+/* Data: 05 de novembre de 2025                                                */
+/*                                                                             */
+/*******************************************************************************/
 
 /* Inclusió de llibreries, p.e. #include <stdio.h> o #include "meu.h"     */
 

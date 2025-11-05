@@ -1,14 +1,15 @@
-/**************************************************************************/
-/*                                                                        */
-/* L'aplicació UEB amb sockets TCP/IP                                     */
-/* Fitxer aUEB.c que implementa la capa d'aplicació de UEB, sobre la      */
-/* cap de transport TCP (fent crides a la "nova" interfície de la         */
-/* capa TCP o "nova" interfície de sockets TCP), en la part servidora.    */
-/*                                                                        */
-/* Autors:                                                                */
-/* Data:                                                                  */
-/*                                                                        */
-/**************************************************************************/
+/******************************************************************************/
+/*                                                                            */
+/* L'aplicació UEB amb sockets TCP/IP                                         */
+/* Fitxer aUEB.c que implementa la capa d'aplicació de UEB, sobre la          */
+/* cap de transport TCP (fent crides a la "nova" interfície de la             */
+/* capa TCP o "nova" interfície de sockets TCP), en la part servidora.        */
+/*                                                                            */
+/* Autors: Juan José Gómez Villegas, u1987338, u1987338@campus.udg.edu, GEINF */
+/*         Martí Valverde Rodríguez, u1994928, u1994928@campus.udg.edu, GEINF */ 
+/* Data: 05 de novembre de 2025                                               */
+/*                                                                            */
+/******************************************************************************/
 
 /* Inclusió de llibreries, p.e. #include <sys/types.h> o #include "meu.h" */
 /*  (si les funcions externes es cridessin entre elles, faria falta fer   */
@@ -18,13 +19,9 @@
 
 /* Definició de constants, p.e.,                                          */
 
-/* #define XYZ       1500                                                 */
-
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
-
-/* int FuncioInterna(arg1, arg2...);                                      */
 
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1);
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
@@ -47,7 +44,16 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
 /* -1 si hi ha un error en la interfície de sockets.                      */
 int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 {
-	
+	SckEsc = TCP_CreaSockServidor("0.0.0.0", portTCPser);
+
+    if (SckEsc == -1) {
+        TextRes = "Error en crear el socket TCP S";
+        return -1;
+    }
+
+    TextRes = "Creat el socket TCP S en estat Listen";
+
+    return 0;
 }
 
 /* Accepta una connexió d'un C UEB que arriba a través del socket TCP     */
@@ -62,7 +68,23 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 /* -1 si hi ha un error a la interfície de sockets.                       */
 int UEBs_AcceptaConnexio(int SckEsc, char *TextRes)
 {
-	
+    int i;
+    char *IPrem;
+    int *portTCPrem;
+
+    if ((i = TCP_TrobaAdrSockRem(SckEsc, IPrem, portTCPrem)) == -1) {
+        TextRes = "Error en obtenir l'@ remota del socket S";
+        return i;
+    }
+
+	if ((i = TCP_AcceptaConnexio(SckEsc, IPrem, portTCPrem)) == -1) {
+        TextRes = "Error en Acceptar una connexió amb un socket C";
+        return i;
+    }
+
+    TextRes = "Socket S connectat amb un socket C";
+
+    return 0;
 }
 
 /* Serveix una petició UEB d'un C a través de la connexió TCP             */
@@ -101,7 +123,16 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
 /*  -1 si hi ha un error a la interfície de sockets.                      */
 int UEBs_TancaConnexio(int SckCon, char *TextRes)
 {
-	
+    int i;
+
+	if ((i = TCP_TancaSock(SckCon)) == -1) {
+        TextRes = "Error en tancar el socket TCP";
+        return i;
+    }
+
+    TextRes = "Socket TCP tancat";
+
+    return 0;
 }
 
 /* Donat el socket TCP “connectat” d’identificador “SckCon”, troba        */
@@ -121,6 +152,19 @@ int UEBs_TancaConnexio(int SckCon, char *TextRes)
 /*  -1 si hi ha un error a la interfície de sockets.                      */
 int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPrem, int *portTCPrem, char *TextRes)
 {
+    if (TCP_TrobaAdrSockLoc(SckCon, IPloc, portTCPloc) == -1) {
+        TextRes = "Error en trobar l'@ local del socket";
+        return -1;
+    }
+
+    if (TCP_TrobaAdrSockRem(SckCon, IPrem, portTCPrem) == -1) {
+        TextRes = "Error en trobar l'@ remota del socket";
+        return -1;
+    }
+
+    TextRes = "Trobades les @ local i remota del socket";
+
+    return 0;
 }
 
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */

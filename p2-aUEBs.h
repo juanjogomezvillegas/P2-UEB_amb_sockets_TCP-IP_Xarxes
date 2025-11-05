@@ -1,12 +1,13 @@
-/**************************************************************************/
-/*                                                                        */
-/* L'aplicació UEB amb sockets TCP/IP                                     */
-/* Fitxer capçalera de aUEBs.c                                            */
-/*                                                                        */
-/* Autors:                                                                */
-/* Data:                                                                  */
-/*                                                                        */
-/**************************************************************************/
+/*******************************************************************************/
+/*                                                                             */
+/* L'aplicació UEB amb sockets TCP/IP                                          */
+/* Fitxer capçalera de aUEBs.c                                                 */
+/*                                                                             */
+/* Autors: Juan José Gómez Villegas, u1987338, u1987338@campus.udg.edu, GEINF  */
+/*         Martí Valverde Rodríguez, u1994928, u1994928@campus.udg.edu, GEINF  */ 
+/* Data: 05 de novembre de 2025                                                */
+/*                                                                             */
+/*******************************************************************************/
 
 /* Declaració de funcions EXTERNES de aUEBs.c, és a dir, d'aquelles       */
 /* funcions que es faran servir en un altre fitxer extern a aUEBs.c,      */
@@ -21,6 +22,3 @@ int UEBs_AcceptaConnexio(int SckEsc, char *TextRes);
 int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *TextRes);
 int UEBs_TancaConnexio(int SckCon, char *TextRes);
 int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPrem, int *portTCPrem, char *TextRes);
-/* int UEBs_FuncioExterna(arg1, arg2...);                                 */
-
-
