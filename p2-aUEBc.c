@@ -59,7 +59,7 @@ int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *TextRes)
         return i;
     }
 
-    TextRes = "Socket C connectat al socket S amb IP i Port especificats per paràmetre";
+    TextRes = "Socket C connectat al socket S";
 
     return 0;
 }
