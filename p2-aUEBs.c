@@ -44,14 +44,12 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
 /* -1 si hi ha un error en la interfície de sockets.                      */
 int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 {
-	SckEsc = TCP_CreaSockServidor("0.0.0.0", portTCPser);
+    int codiRes;
 
-    if (SckEsc == -1) {
-        TextRes = "Error en crear el socket TCP S";
+    if ((SckEsc = TCP_CreaSockServidor("0.0.0.0", portTCPser)) == -1) {
+        sprintf(TextRes, "UEBs_IniciaServ() -> TCP_CreaSockServidor(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
-
-    TextRes = "Creat el socket TCP S en estat Listen";
 
     return 0;
 }
@@ -68,21 +66,19 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 /* -1 si hi ha un error a la interfície de sockets.                       */
 int UEBs_AcceptaConnexio(int SckEsc, char *TextRes)
 {
-    int i;
+    int codiRes;
     char *IPrem;
     int *portTCPrem;
 
-    if ((i = TCP_TrobaAdrSockRem(SckEsc, IPrem, portTCPrem)) == -1) {
-        TextRes = "Error en obtenir l'@ remota del socket S";
-        return i;
+    if (TCP_TrobaAdrSockRem(SckEsc, IPrem, portTCPrem) == -1) {
+        sprintf(TextRes, "UEBs_AcceptaConnexio() -> TCP_TrobaAdrSockRem(): %s\n", T_ObteTextRes(&codiRes));
+        return -1;
     }
 
-	if ((i = TCP_AcceptaConnexio(SckEsc, IPrem, portTCPrem)) == -1) {
-        TextRes = "Error en Acceptar una connexió amb un socket C";
-        return i;
+	if (TCP_AcceptaConnexio(SckEsc, IPrem, portTCPrem) == -1) {
+        sprintf(TextRes, "UEBs_AcceptaConnexio() -> TCP_AcceptaConnexio(): %s\n", T_ObteTextRes(&codiRes));
+        return -1;
     }
-
-    TextRes = "Socket S connectat amb un socket C";
 
     return 0;
 }
@@ -123,14 +119,12 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
 /*  -1 si hi ha un error a la interfície de sockets.                      */
 int UEBs_TancaConnexio(int SckCon, char *TextRes)
 {
-    int i;
+    int codiRes;
 
-	if ((i = TCP_TancaSock(SckCon)) == -1) {
-        TextRes = "Error en tancar el socket TCP";
-        return i;
+	if (TCP_TancaSock(SckCon) == -1) {
+        sprintf(TextRes, "UEBs_TancaConnexio() -> TCP_TancaSock(): %s\n", T_ObteTextRes(&codiRes));
+        return -1;
     }
-
-    TextRes = "Socket TCP tancat";
 
     return 0;
 }
@@ -152,17 +146,17 @@ int UEBs_TancaConnexio(int SckCon, char *TextRes)
 /*  -1 si hi ha un error a la interfície de sockets.                      */
 int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPrem, int *portTCPrem, char *TextRes)
 {
+    int codiRes;
+
     if (TCP_TrobaAdrSockLoc(SckCon, IPloc, portTCPloc) == -1) {
-        TextRes = "Error en trobar l'@ local del socket";
+        sprintf(TextRes, "UEBs_TrobaAdrSckConnexio() -> TCP_TrobaAdrSockLoc(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
 
     if (TCP_TrobaAdrSockRem(SckCon, IPrem, portTCPrem) == -1) {
-        TextRes = "Error en trobar l'@ remota del socket";
+        sprintf(TextRes, "UEBs_TrobaAdrSckConnexio() -> TCP_TrobaAdrSockRem(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
-
-    TextRes = "Trobades les @ local i remota del socket";
 
     return 0;
 }
