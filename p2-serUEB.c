@@ -33,7 +33,7 @@ int scon;
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
 void aturadaS(int signal);
-int readPortTipic(char* file_cfg);
+int readPortTipic(char* file_cfg, char* arrel_lloc_ueb);
 int exitError(char* textRes);
 void Tanca(int Sck);
 
@@ -43,6 +43,7 @@ int main(int argc,char *argv[]) {
 
     /* Declaració de variables                                            */
     int port_tipic;
+    char arrel_lloc_ueb;
     char textRes;
     char iprem[16], iploc[16];
     int portrem, portloc;
@@ -51,7 +52,7 @@ int main(int argc,char *argv[]) {
 
     /* Situació pre-inicial                                               */
 
-    port_tipic = readPortTipic(FILE_PORT_TIPIC); // llegeix el port típic
+    port_tipic = readPortTipic(FILE_PORT_TIPIC, &arrel_lloc_ueb); // llegeix el port típic
 
     if (UEBs_IniciaServ(&sesc, port_tipic, &textRes) == -1) { // crea el seu socket d'escolta amb aquest port típic
         exit(exitError(&textRes));
@@ -133,7 +134,7 @@ void aturadaS(int signal) {
 /* Retorna:                                                               */
 /*  el port tipic llegit si tot va bé;                                    */
 /* -1 si hi ha error.                                                     */
-int readPortTipic(char* file_cfg) {
+int readPortTipic(char* file_cfg, char* arrel_lloc_ueb) {
     // declaració de variables
     FILE *file;
     char line[256];
@@ -151,7 +152,9 @@ int readPortTipic(char* file_cfg) {
     while (fgets(line, sizeof(line), file) && !fi) {
         if (strncmp(line, "numportTCP", 10) == 0) {
             sscanf(line+11, "%d", &port);
-            fi = true;
+        } else if (strncmp(line, "Arrel", 5) == 0) {
+            sscanf(line+6, "%s", arrel_lloc_ueb);
+            printf("%s", arrel_lloc_ueb);
         }
     }
 
