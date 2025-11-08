@@ -16,6 +16,8 @@
 /*   un #include del propi fitxer capçalera)                              */
 
 #include "p2-tTCP.h"
+#include <string.h>
+#include <stdio.h>
 
 /* Definició de constants, p.e.,                                          */
 
@@ -44,8 +46,8 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
 /* -1 si hi ha un error en la interfície de sockets.                      */
 int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 {
-    if ((SckEsc = TCP_CreaSockServidor("0.0.0.0", portTCPser)) == -1) {
-        sprintf(TextRes, "UEBs_IniciaServ() -> TCP_CreaSockServidor(): %s\n", T_ObteTextRes(&SckEsc));
+    if ((*SckEsc = TCP_CreaSockServidor("0.0.0.0", portTCPser)) == -1) {
+        sprintf(TextRes, "UEBs_IniciaServ() -> TCP_CreaSockServidor(): %s\n", T_ObteTextRes(SckEsc));
         return -1;
     }
 
@@ -64,21 +66,16 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 /* -1 si hi ha un error a la interfície de sockets.                       */
 int UEBs_AcceptaConnexio(int SckEsc, char *TextRes)
 {
-    int codiRes;
-    char *IPrem;
-    int *portTCPrem;
-
-    if ((codiRes = TCP_TrobaAdrSockRem(SckEsc, IPrem, portTCPrem)) == -1) {
-        sprintf(TextRes, "UEBs_AcceptaConnexio() -> TCP_TrobaAdrSockRem(): %s\n", T_ObteTextRes(&codiRes));
+    int scon;
+    char iprem[16];
+    int portrem;
+    
+    if ((scon = TCP_AcceptaConnexio(SckEsc, iprem, &portrem)) == -1) {
+        sprintf(TextRes, "UEBs_AcceptaConnexio() -> TCP_AcceptaConnexio(): %s\n", T_ObteTextRes(&scon));
         return -1;
     }
 
-	if ((codiRes = TCP_AcceptaConnexio(SckEsc, IPrem, portTCPrem)) == -1) {
-        sprintf(TextRes, "UEBs_AcceptaConnexio() -> TCP_AcceptaConnexio(): %s\n", T_ObteTextRes(&codiRes));
-        return -1;
-    }
-
-    return 0;
+    return scon;
 }
 
 /* Serveix una petició UEB d'un C a través de la connexió TCP             */
@@ -146,14 +143,16 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 {
     int codiRes;
 
+    // troba l'adreça local
     if ((codiRes = TCP_TrobaAdrSockLoc(SckCon, IPloc, portTCPloc)) == -1) {
         sprintf(TextRes, "UEBs_TrobaAdrSckConnexio() -> TCP_TrobaAdrSockLoc(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
 
-    if ((codiRes = TCP_TrobaAdrSockRem(SckCon, IPrem, portTCPrem)) == -1) {
-        sprintf(TextRes, "UEBs_TrobaAdrSckConnexio() -> TCP_TrobaAdrSockRem(): %s\n", T_ObteTextRes(&codiRes));
-        return -1;
+    // troba l'adreça remota, en cas d'error (retorn -1), 
+    // simplement no omplirà IPrem i portTCPrem, però la resta funcionarà sense problemes
+    if (TCP_TrobaAdrSockRem(SckCon, IPrem, portTCPrem) == -1) {
+        strcpy(TextRes, "");
     }
 
     return 0;
