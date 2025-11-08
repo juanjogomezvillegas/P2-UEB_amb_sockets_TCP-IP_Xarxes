@@ -50,11 +50,11 @@ int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *TextRes)
     int sckC;
 
     if ((sckC = TCP_CreaSockClient("0.0.0.0", 0)) == -1) {
-        sprintf(TextRes, "UEBc_DemanaConnexio() -> TCP_CreaSockClient(): %s\n", T_ObteTextRes(&codiRes));
+        sprintf(TextRes, "UEBc_DemanaConnexio() -> TCP_CreaSockClient(): %s\n", T_ObteTextRes(&sckC));
         return -1;
     }
 
-	if (TCP_DemanaConnexio(sckC, IPser, portTCPser) == -1) {
+	if ((codiRes = TCP_DemanaConnexio(sckC, IPser, portTCPser)) == -1) {
         sprintf(TextRes, "UEBc_DemanaConnexio() -> TCP_DemanaConnexio(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
@@ -98,7 +98,7 @@ int UEBc_TancaConnexio(int SckCon, char *TextRes)
 {
 	int codiRes;
 
-	if (TCP_TancaSock(SckCon) == -1) {
+	if ((codiRes = TCP_TancaSock(SckCon)) == -1) {
         sprintf(TextRes, "UEBc_TancaConnexio() -> TCP_TancaSock(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
@@ -125,12 +125,12 @@ int UEBc_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 {
     int codiRes;
 
-    if (TCP_TrobaAdrSockLoc(SckCon, IPloc, portTCPloc) == -1) {
+    if ((codiRes = TCP_TrobaAdrSockLoc(SckCon, IPloc, portTCPloc)) == -1) {
         sprintf(TextRes, "UEBc_TrobaAdrSckConnexio() -> TCP_TrobaAdrSockLoc(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
 
-    if (TCP_TrobaAdrSockRem(SckCon, IPrem, portTCPrem) == -1) {
+    if ((codiRes = TCP_TrobaAdrSockRem(SckCon, IPrem, portTCPrem)) == -1) {
         sprintf(TextRes, "UEBc_TrobaAdrSckConnexio() -> TCP_TrobaAdrSockRem(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }

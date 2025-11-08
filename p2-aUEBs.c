@@ -44,10 +44,8 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
 /* -1 si hi ha un error en la interfície de sockets.                      */
 int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *TextRes)
 {
-    int codiRes;
-
     if ((SckEsc = TCP_CreaSockServidor("0.0.0.0", portTCPser)) == -1) {
-        sprintf(TextRes, "UEBs_IniciaServ() -> TCP_CreaSockServidor(): %s\n", T_ObteTextRes(&codiRes));
+        sprintf(TextRes, "UEBs_IniciaServ() -> TCP_CreaSockServidor(): %s\n", T_ObteTextRes(&SckEsc));
         return -1;
     }
 
@@ -70,12 +68,12 @@ int UEBs_AcceptaConnexio(int SckEsc, char *TextRes)
     char *IPrem;
     int *portTCPrem;
 
-    if (TCP_TrobaAdrSockRem(SckEsc, IPrem, portTCPrem) == -1) {
+    if ((codiRes = TCP_TrobaAdrSockRem(SckEsc, IPrem, portTCPrem)) == -1) {
         sprintf(TextRes, "UEBs_AcceptaConnexio() -> TCP_TrobaAdrSockRem(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
 
-	if (TCP_AcceptaConnexio(SckEsc, IPrem, portTCPrem) == -1) {
+	if ((codiRes = TCP_AcceptaConnexio(SckEsc, IPrem, portTCPrem)) == -1) {
         sprintf(TextRes, "UEBs_AcceptaConnexio() -> TCP_AcceptaConnexio(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
@@ -121,7 +119,7 @@ int UEBs_TancaConnexio(int SckCon, char *TextRes)
 {
     int codiRes;
 
-	if (TCP_TancaSock(SckCon) == -1) {
+	if ((codiRes = TCP_TancaSock(SckCon)) == -1) {
         sprintf(TextRes, "UEBs_TancaConnexio() -> TCP_TancaSock(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
@@ -148,12 +146,12 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 {
     int codiRes;
 
-    if (TCP_TrobaAdrSockLoc(SckCon, IPloc, portTCPloc) == -1) {
+    if ((codiRes = TCP_TrobaAdrSockLoc(SckCon, IPloc, portTCPloc)) == -1) {
         sprintf(TextRes, "UEBs_TrobaAdrSckConnexio() -> TCP_TrobaAdrSockLoc(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
 
-    if (TCP_TrobaAdrSockRem(SckCon, IPrem, portTCPrem) == -1) {
+    if ((codiRes = TCP_TrobaAdrSockRem(SckCon, IPrem, portTCPrem)) == -1) {
         sprintf(TextRes, "UEBs_TrobaAdrSckConnexio() -> TCP_TrobaAdrSockRem(): %s\n", T_ObteTextRes(&codiRes));
         return -1;
     }
