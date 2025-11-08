@@ -18,7 +18,7 @@
 
 /* Definició de constants, p.e.,                                          */
 
-/* #define XYZ       1500                                                 */
+#define PORT_TIPIC 8000
 
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
