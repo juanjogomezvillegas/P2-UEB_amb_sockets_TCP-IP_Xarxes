@@ -79,15 +79,16 @@ int main(int argc,char *argv[]) {
                     Tanca(scon);
                     Tanca(sesc);
                     exit(exitError("Error in read message of the C.\n"));
-
-                    //UEBs_ServeixPeticio(scon, tipuspet, fitxer, &textRes);
-
-                    // al S, la carpeta / o arrel del lloc UEB, correspon a la carpeta on s'executa el S
-                    // es mostra per pantalla la peticio: "obtenir", nom_fitxer, @socket(@IP:#Port) de C i S
-                    // i si el fitxer s'ha servit bé o no existia (o altres errors)
-                } else {
-                    Tanca(scon);
                 }
+
+                //UEBs_ServeixPeticio(scon, tipuspet, fitxer, &textRes);
+
+                // al S, la carpeta / o arrel del lloc UEB, correspon a la carpeta on s'executa el S
+                // es mostra per pantalla la peticio: "obtenir", nom_fitxer, @socket(@IP:#Port) de C i S
+                // i si el fitxer s'ha servit bé o no existia (o altres errors)
+                
+            } else {
+                Tanca(scon);
             }
         }
     }
