@@ -29,7 +29,7 @@ int SckCon;           // socket de connexió global per gestionar el tancament e
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
-void aturadaS(int signal, int SckCon);
+void aturadaS(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
 /* int FuncioInterna(arg1, arg2...);  */
@@ -73,7 +73,8 @@ int main(int argc,char *argv[])
     if (UEBc_TrobaAdrSckConnexio(SckCon, IPloc, &portTCPloc, IPrem, &portTCPrem, TextRes) == -1) {
         printf("Error en obtenir les adreces del socket de connexio: %s\n", TextRes);
         Tanca(SckCon);
-        return exitError(TextRes);
+        exit(exitError(TextRes));
+
     }
     //Ara que tenim el socket i les adreçes locals ja podem demanar el fitxer
 
@@ -89,7 +90,8 @@ int main(int argc,char *argv[])
     if (UEBc_ObteFitxer(SckCon, nomFitxer, Fitx, &LongFitx, TextRes) == -1) {
         printf("Error en obtenir el fitxer: %s\n", TextRes);
         Tanca(SckCon);
-        return exitError(TextRes);
+        exit(exitError(TextRes));
+
     }
 
     printf("Fitxer rebut correctament. Longitud: %d bytes\n", LongFitx);
@@ -101,7 +103,8 @@ int main(int argc,char *argv[])
     if (f == NULL) {
         perror("No s'ha pogut crear el fitxer local");
         Tanca(SckCon);
-        exit(exitError(&TextRes));
+        exit(exitError(TextRes));
+
     }
 
     // Escriure el contingut rebut al fitxer local
@@ -117,7 +120,8 @@ int main(int argc,char *argv[])
     // Tancar la connexió
     if(n = UEBc_TancaConnexio(SckCon, TextRes) == -1){
         printf("Error en tancar la connexió: %s", TextRes);
-        exit(exitError(&TextRes));
+        exit(exitError(TextRes));
+
     }
 
     printf("Connexio tancada correctament.\n");
@@ -128,7 +132,7 @@ int main(int argc,char *argv[])
 /* servir només en aquest mateix fitxer. Les seves declaracions es troben */
 /* a l'inici d'aquest fitxer.                                             */
     
-void aturadaS(int signal, int SckCon) {
+void aturadaS(int signal) {
     printf("\nS'ha detectat el senyal Control+c. Espera un moment...\n"); // informa a l'usuari per pantalla
     if(SckCon>0){
         Tanca(SckCon);
@@ -159,6 +163,7 @@ void Tanca(int Sck) {
 char TextRes[200];
     if (UEBc_TancaConnexio(Sck, TextRes) == -1) {
         exit(exitError(TextRes));
+
     }
 }
 
