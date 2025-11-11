@@ -44,7 +44,22 @@ int main(int argc,char *argv[])
     }
     printf("%s\n", TextRes);
 
+    int SckCon;
+    int portTCPloc;
+    char *IPloc;
+
+    if(n = UEBc_TrobaAdrSckConnexio(SckCon, IPloc, portTCPloc, IPser, portTCPser, TextRes) == -1){
+        printf("Error en trobar l'adreça del socket de connexió: %s", TextRes);
+        return -1;
+
+    }
+
+    printf("Introduir nom del fitxer a obtenir(format: /nom_fitxer.ext): ");
+    char nomFitxer[100];
+    scanf("%s", nomFitxer);
+
     
+
 
 }
 
