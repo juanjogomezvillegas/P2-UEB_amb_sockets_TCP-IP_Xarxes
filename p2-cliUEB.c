@@ -28,7 +28,7 @@
 
 int main(int argc,char *argv[])
 {
-    char* IPser;
+    char *IPser;
     int portTCPser;
     char TextRes[256];
     int n;
@@ -38,7 +38,7 @@ int main(int argc,char *argv[])
     printf("Port TCP del servidor UEB (per defecte %d): ", PORT_TIPIC);
     scanf("%d", &portTCPser);
 
-    if(n = UEBc_DemanaConnexio(*IPser, portTCPser, TextRes) == -1){
+    if(n = UEBc_DemanaConnexio(IPser, portTCPser, &TextRes) == -1){
         printf("Error en la connexió: %s", TextRes);
         return -1;
     }
@@ -54,11 +54,27 @@ int main(int argc,char *argv[])
 
     }
 
-    printf("Introduir nom del fitxer a obtenir(format: /nom_fitxer.ext): ");
-    char nomFitxer[100];
-    scanf("%s", nomFitxer);
 
-    
+    char *Fitx;
+    int LongFitx;
+
+    for(;;){
+        printf("Introduir nom del fitxer a obtenir(format: /nom_fitxer.ext): ");
+        char nomFitxer[100];
+        scanf("%s", nomFitxer);
+
+        // Crida a la funció per sol·licitar el fitxer i rebre'l
+        if(n = UEBc_ObteFitxer(SckCon, nomFitxer, Fitx, LongFitx, TextRes) == -1){
+            printf("Error en sol·licitar el fitxer: %s", TextRes);
+            return -1;
+        }
+
+    }
+   
+
+
+
+
 
 
 }
