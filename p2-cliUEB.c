@@ -68,17 +68,7 @@ int main(int argc,char *argv[])
             printf("Error en sol·licitar el fitxer: %s", TextRes);
             return -1;
         }
-
-        
-
     }
-   
-
-
-
-
-
-
 }
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
