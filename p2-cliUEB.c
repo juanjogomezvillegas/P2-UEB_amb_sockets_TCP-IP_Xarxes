@@ -75,26 +75,45 @@ int main(int argc,char *argv[])
     //Ara que tenim el socket i les adreçes locals ja podem demanar el fitxer
 
     //Declarem les variables per obtenir el fitxer
-    char *Fitx;
+    char Fitx[10000];   // buffer per rebre el fitxer
     int LongFitx;
 
-    printf("Introduir nom del fitxer a obtenir(format: \"/nom_fitxer.ext\"): ");
+    printf("Introduir nom del fitxer a obtenir (format: \"/nom_fitxer.ext\"): ");
     char nomFitxer[100];
     scanf("%s", nomFitxer);
 
-    /* Crida a la funció per sol·licitar el fitxer i rebre'l (Dintre de la funcio és construeix el 
-    missatge d'anada i després es deconstrueix el de tornada)*/
-    if(n = UEBc_ObteFitxer(SckCon, nomFitxer, Fitx, LongFitx, TextRes) == -1){
+    /* Crida a la funció per sol·licitar el fitxer i rebre'l */
+    if ((n = UEBc_ObteFitxer(SckCon, nomFitxer, Fitx, &LongFitx, TextRes)) == -1) {
         printf("Error en obtenir el fitxer: %s", TextRes);
+        Tanca(SckCon);
+        exit(exitError(TextRes));
+    }
+
+    printf("Fitxer rebut correctament. Longitud: %d bytes\n", LongFitx);
+
+
+    char nomLocal[128];
+    sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
+    FILE *f = fopen(nomLocal, "wb");
+    if (f == NULL) {
+        perror("No s'ha pogut crear el fitxer local");
         Tanca(SckCon);
         exit(exitError(&TextRes));
     }
-    printf("Fitxer rebut correctament. Longitud: %d bytes\n", LongFitx);
+
+    // Escriure el contingut rebut al fitxer local
+    fwrite(Fitx, 1, LongFitx, f);
+    fclose(f);
+    printf("Fitxer desat com a %s\n", nomLocal);
+
+    // Obrir el fitxer rebut amb el navegador per defecte del sistema
+    char cmd[200];
+    sprintf(cmd, "xdg-open %s", nomLocal);
+    system(cmd);
 
     // Tancar la connexió
     if(n = UEBc_TancaConnexio(SckCon, TextRes) == -1){
         printf("Error en tancar la connexió: %s", TextRes);
-        Tanca(SckCon);
         exit(exitError(&TextRes));
     }
 }
