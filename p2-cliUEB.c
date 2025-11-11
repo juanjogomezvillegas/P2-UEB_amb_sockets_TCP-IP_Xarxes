@@ -42,7 +42,7 @@ int main(int argc,char *argv[])
         printf("Error en la connexió: %s", TextRes);
         return -1;
     }
-    printf(TextRes"\n");
+    printf("%s\n", TextRes);
 
     
 
