@@ -16,6 +16,9 @@
 /*   un #include del propi fitxer capçalera)                              */
 
 #include "p2-tTCP.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 /* Definició de constants, p.e.,                                          */
 
@@ -82,35 +85,36 @@ int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *TextRes)
 /* -3 si l'altra part tanca la connexió.                                  */
 int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, char *TextRes)
 {
+    /*Declarem les variables necessaries*/
 	int codiRes;
     char tipus[5];
     char info[10000];
     int long1;
 
+    /*Construim el missatge i l'enviem*/
     codiRes = ConstiEnvMis(SckCon, "OBTE", NomFitx, strlen(NomFitx));
     if (codiRes < 0) {
-        sprintf(TextRes, "UEBc_ObteFitxer() -> ConstiEnvMis(): error %d\n", codiRes);
+        sprintf(TextRes, "Error en ConstiEnvMis: %d", codiRes);
         return codiRes;
     }
 
+    /*Rebem el missatge de resposta i el desconstruim*/
     codiRes = RepiDesconstMis(SckCon, tipus, info, &long1);
     if (codiRes < 0) {
-        sprintf(TextRes, "UEBc_ObteFitxer() -> RepiDesconstMis(): error %d\n", codiRes);
+        sprintf(TextRes, "Error en RepiDesconstMis: %d", codiRes);
         return codiRes;
     }
 
     if (strcmp(tipus, "DATA") == 0) {
         memcpy(Fitx, info, long1);
         *LongFitx = long1;
-        sprintf(TextRes, "Fitxer rebut correctament (%d bytes)\n", long1);
+        sprintf(TextRes, "Fitxer rebut correctament (%d bytes)", long1);
         return 0;
-    } 
-    else if (strcmp(tipus, "ERRR") == 0) {
-        sprintf(TextRes, "Error del servidor: %.*s\n", long1, info);
+    } else if (strcmp(tipus, "ERRR") == 0) {
+        sprintf(TextRes, "Error del servidor: %.*s", long1, info);
         return 1;
-    } 
-    else {
-        sprintf(TextRes, "Resposta amb tipus desconegut: %s\n", tipus);
+    } else {
+        sprintf(TextRes, "Tipus desconegut: %s", tipus);
         return -2;
     }
 }
@@ -202,25 +206,20 @@ int UEBc_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 /* -2 si protocol és incorrecte (longitud camps, tipus de peticio).       */
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 {
-	char buff[10008]; // 4 (tipus) + 4 (longitud) + 9999 (info)
+    char buff[10008];
     char campLong[5];
-    int ret;
 
-    if (strlen(tipus) != 4 || long1 < 0 || long1 > 9999){
+    if (strlen(tipus) != 4 || long1 < 0 || long1 > 9999)
         return -2;
-    }
 
     sprintf(campLong, "%04d", long1);
     memcpy(buff, tipus, 4);
     memcpy(buff + 4, campLong, 4);
-    if (long1 > 0){
+    if (long1 > 0)
         memcpy(buff + 8, info1, long1);
-    }
 
-    ret = TCP_Envia(SckCon, buff, 8 + long1);
-    if (ret == -1){
-        return -1; 
-    }
+    if (TCP_Envia(SckCon, buff, 8 + long1) == -1)
+        return -1;
 
     return 0;
 }
@@ -246,12 +245,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
     int ret;
 
     ret = TCP_Rep(SckCon, bufCap, 8);
-    if (ret == 0){
-        return -3;
-    }
-    if (ret == -1){
-        return -1; 
-    }
+    if (ret <= 0) return (ret == 0) ? -3 : -1;
 
     memcpy(tipus, bufCap, 4);
     tipus[4] = '\0';
@@ -259,20 +253,13 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
     char campLong[5];
     memcpy(campLong, bufCap + 4, 4);
     campLong[4] = '\0';
-
     *long1 = atoi(campLong);
-    if (*long1 < 0 || *long1 > 9999){
-        return -2;
-    }
+
+    if (*long1 < 0 || *long1 > 9999) return -2;
 
     if (*long1 > 0) {
         ret = TCP_Rep(SckCon, info1, *long1);
-        if (ret == 0){
-            return -3;
-        }
-        if (ret == -1){
-            return -1;
-        }
+        if (ret <= 0) return (ret == 0) ? -3 : -1;
     }
 
     return 0;
