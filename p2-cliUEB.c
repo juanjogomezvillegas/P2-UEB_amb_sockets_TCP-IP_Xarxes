@@ -29,30 +29,33 @@ int SckCon;           // socket de connexió global per gestionar el tancament e
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
-void aturadaS(int signal);
+void aturadaC(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
-/* int FuncioInterna(arg1, arg2...);  */
-                         
 
-int main(int argc,char *argv[])
-{
-    signal(SIGINT, aturadaS);
+int main(int argc,char *argv[]) {
+    /* Senyals.                                                           */
+    signal(SIGINT, aturadaC);
 
-    //Declaració de les variables necessaries per fer la connexió
+    /* Declaració de variables                                            */
     char IPser[64];
     int portTCPser = PORT_TIPIC;
     char TextRes[256];
     SckCon = -1;
     int n = -1;
+    char IPloc[16], IPrem[16];
+    int portTCPloc, portTCPrem;
+    // variables per obtenir el fitxer
+    char Fitx[10000];   // buffer per rebre el fitxer
+    int LongFitx;
 
-    //Demanem al usuari la IP i el port del servidor
+    /* Demanem al usuari la IP i el port del servidor                     */
     printf("Direccio IP del servidor UEB: ");
     scanf("%63s", IPser);
     printf("Port TCP del servidor UEB (per defecte %d): ", PORT_TIPIC);
     scanf("%d", &portTCPser);
 
-    //intentem connectarnos, si no ho aconseguim tornem a demanar les dades
+    /* Demanem al usuari la IP i el port del servidor                     */
     while (n == -1){
         n = UEBc_DemanaConnexio(IPser, portTCPser, TextRes);
         if (n == -1) {
@@ -64,11 +67,12 @@ int main(int argc,char *argv[])
             scanf("%d", &portTCPser);
         }
     }
-    printf("%s\n", TextRes);
 
-    //Declarem les variables per obtenir les adreces del socket de connexió
-    char IPloc[16], IPrem[16];
-    int portTCPloc, portTCPrem;
+    printf("%s\n", TextRes);
+    SckCon = n;
+
+    /* obtenir les adreces del socket de connexió                                  */
+    /* I un cop tinguem el socket i les adreçes locals ja podem demanar el fitxer  */
 
     if (UEBc_TrobaAdrSckConnexio(SckCon, IPloc, &portTCPloc, IPrem, &portTCPrem, TextRes) == -1) {
         printf("Error en obtenir les adreces del socket de connexio: %s\n", TextRes);
@@ -76,11 +80,6 @@ int main(int argc,char *argv[])
         exit(exitError(TextRes));
 
     }
-    //Ara que tenim el socket i les adreçes locals ja podem demanar el fitxer
-
-    //Declarem les variables per obtenir el fitxer
-    char Fitx[10000];   // buffer per rebre el fitxer
-    int LongFitx;
 
     printf("Introduir nom del fitxer a obtenir (format: \"/nom_fitxer.ext\"): ");
     char nomFitxer[100];
@@ -95,7 +94,6 @@ int main(int argc,char *argv[])
     }
 
     printf("Fitxer rebut correctament. Longitud: %d bytes\n", LongFitx);
-
 
     char nomLocal[128];
     sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
@@ -125,6 +123,7 @@ int main(int argc,char *argv[])
     }
 
     printf("Connexio tancada correctament.\n");
+
     return 0;
 }
 
@@ -132,7 +131,7 @@ int main(int argc,char *argv[])
 /* servir només en aquest mateix fitxer. Les seves declaracions es troben */
 /* a l'inici d'aquest fitxer.                                             */
     
-void aturadaS(int signal) {
+void aturadaC(int signal) {
     printf("\nS'ha detectat el senyal Control+c. Espera un moment...\n"); // informa a l'usuari per pantalla
     if(SckCon>0){
         Tanca(SckCon);

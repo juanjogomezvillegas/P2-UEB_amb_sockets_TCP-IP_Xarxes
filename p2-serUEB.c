@@ -73,14 +73,23 @@ int main(int argc,char *argv[]) {
             exit(exitError(&textRes));
         }
 
+        if (UEBs_TrobaAdrSckConnexio(scon, iploc, &portloc, iprem, &portrem, &textRes) == -1) {
+            Tanca(sesc);
+            Tanca(scon);
+            exit(exitError(&textRes));
+        }
+
+        printf("C @ip=%s;#port=%d connectat\n", iprem, portrem);
+
         bytes_llegits = 1;
         while (bytes_llegits > 0) {
+            if ((bytes_llegits = read(scon, buffer, 1000)) == -1) { // S rep del C una peticio UEB i la respon
+                Tanca(scon);
+                Tanca(sesc);
+                exit(exitError("Error in read message of the C.\n"));
+            }
+
             if (bytes_llegits > 0) {
-                if ((bytes_llegits = read(scon, buffer, 1000)) == -1) { // S rep del C una peticio UEB i la respon
-                    Tanca(scon);
-                    Tanca(sesc);
-                    exit(exitError("Error in read message of the C.\n"));
-                }
 
                 //UEBs_ServeixPeticio(scon, tipuspet, fitxer, &textRes);
 
@@ -89,6 +98,8 @@ int main(int argc,char *argv[]) {
                 // i si el fitxer s'ha servit bé o no existia (o altres errors)
                 
             } else {
+                printf("C desconnectat\n");
+
                 Tanca(scon);
             }
         }

@@ -62,7 +62,7 @@ int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *TextRes)
         return -1;
     }
 
-    return 0;
+    return sckC;
 }
 
 /* Obté el fitxer de nom "NomFitx" del S UEB a través de la connexió TCP  */
