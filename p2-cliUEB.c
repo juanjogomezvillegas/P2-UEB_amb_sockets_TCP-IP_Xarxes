@@ -75,7 +75,6 @@ int main(int argc,char *argv[]) {
         printf("Error en obtenir les adreces del socket de connexio: %s\n", TextRes);
         Tanca(SckCon);
         exit(exitError(TextRes));
-
     }
 
     printf("Introduir nom del fitxer a obtenir (format: \"/nom_fitxer.ext\"): ");
@@ -87,7 +86,6 @@ int main(int argc,char *argv[]) {
         printf("Error en obtenir el fitxer: %s\n", TextRes);
         Tanca(SckCon);
         exit(exitError(TextRes));
-
     }
 
     printf("Fitxer rebut correctament. Longitud: %d bytes\n", LongFitx);
@@ -99,7 +97,6 @@ int main(int argc,char *argv[]) {
         perror("No s'ha pogut crear el fitxer local");
         Tanca(SckCon);
         exit(exitError(TextRes));
-
     }
 
     // Escriure el contingut rebut al fitxer local
@@ -116,7 +113,6 @@ int main(int argc,char *argv[]) {
     if(SckCon = UEBc_TancaConnexio(SckCon, TextRes) == -1){
         printf("Error en tancar la connexió: %s", TextRes);
         exit(exitError(TextRes));
-
     }
 
     printf("Connexio tancada correctament.\n");
