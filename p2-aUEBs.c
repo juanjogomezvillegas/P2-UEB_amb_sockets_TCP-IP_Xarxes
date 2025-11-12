@@ -100,7 +100,7 @@ int UEBs_AcceptaConnexio(int SckEsc, char *TextRes)
 /*  comença per /, fitxer no es pot llegir, fitxer massa gran, etc.).     */
 int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *TextRes)
 {
-	
+	//
 }
 
 /* Tanca la connexió TCP d'identificador "SckCon".                        */
@@ -160,21 +160,10 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */
 
-/* Descripció de la funció, dels arguments, valors de retorn, etc.        */
-/* int UEBs_FuncioExterna(arg1, arg2...)
-{
-	
-} */
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer. Les seves declaracions es        */
 /* troben a l'inici d'aquest fitxer.                                      */
-
-/* Descripció de la funció, dels arguments, valors de retorn, etc.        */
-/* int FuncioInterna(arg1, arg2...)
-{
-	
-} */
 
 /* "Construeix" un missatge de PUEB a partir dels seus camps tipus,       */
 /* long1 i info1, escrits, respectivament a "tipus", "long1" i "info1"    */
@@ -192,7 +181,24 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 /* -2 si protocol és incorrecte (longitud camps, tipus de peticio).       */
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 {
-	
+	char buff[10008];
+    char campLong[4];
+
+    if (strlen(tipus) != 4 || long1 < 0 || long1 > 9999)
+        return -2;
+    
+    sprintf(campLong, "%04d", long1);
+    memcpy(buff, tipus, 4);
+    memcpy(buff + 4, campLong, 4);
+    if (long1 > 0) {
+        memcpy(buff + 8, info1, long1);
+    }
+
+    if (TCP_Envia(SckCon, buff, 8 + long1) == -1) {
+        return -1;
+    }
+
+    return 0;
 }
 
 /* Rep a través del socket TCP “connectat” d’identificador “SckCon” un    */
@@ -212,5 +218,32 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 /* -3 si l'altra part tanca la connexió.                                  */
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 {
-	
+	char bufCap[8];
+    int ret;
+
+    ret = TCP_Rep(SckCon, bufCap, 8);
+    if (ret <= 0) {
+        return (ret == 0) ? -3 : -1;
+    }
+
+    memcpy(tipus, bufCap, 4);
+    tipus[4] = '\0';
+
+    char campLong[5];
+    memcpy(campLong, bufCap + 4, 4);
+    campLong[4] = '\0';
+    *long1 = atoi(campLong);
+
+    if (*long1 < 0 || *long1 > 9999) {
+        return -2;
+    }
+
+    if (*long1 > 0) {
+        ret = TCP_Rep(SckCon, info1, *long1);
+        if (ret <= 0) {
+            return (ret == 0) ? -3 : -1;
+        }
+    }
+
+    return 0;
 }

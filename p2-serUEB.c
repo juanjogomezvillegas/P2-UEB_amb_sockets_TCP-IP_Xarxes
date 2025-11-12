@@ -58,12 +58,7 @@ int main(int argc,char *argv[]) {
         exit(exitError(&textRes));
     }
 
-    if (UEBs_TrobaAdrSckConnexio(sesc, iploc, &portloc, iprem, &portrem, &textRes) == -1) {
-        Tanca(sesc);
-        exit(exitError(&textRes));
-    }
-
-    printf("\nS iniciat amb @IP=%s;#Port=%d:\n", iploc, portloc);
+    printf("\nServidor UEB iniciat al #Port=%d:\n", port_tipic);
 
     /* Situació inicial                                                   */
 
@@ -79,7 +74,8 @@ int main(int argc,char *argv[]) {
             exit(exitError(&textRes));
         }
 
-        printf("C @ip=%s;#port=%d connectat\n", iprem, portrem);
+        printf("S'ha connectat un C en el socket @IP=%s;#port=%d\n", iprem, portrem);
+        printf("Socket local @IP=%s;#port=%d\n", iploc, portloc);
 
         bytes_llegits = 1;
         while (bytes_llegits > 0) {
