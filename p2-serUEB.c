@@ -87,7 +87,7 @@ int main(int argc,char *argv[]) {
 
             if (bytes_llegits > 0) {
 
-                //UEBs_ServeixPeticio(scon, tipuspet, fitxer, &textRes);
+                //UEBs_ServeixPeticio(scon, tipus, fitxer, &textRes);
 
                 // al S, la carpeta / o arrel del lloc UEB, correspon a la carpeta on s'executa el S
                 // es mostra per pantalla la peticio: "obtenir", nom_fitxer, @socket(@IP:#Port) de C i S
