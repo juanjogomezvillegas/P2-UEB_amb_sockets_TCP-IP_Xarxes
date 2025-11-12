@@ -42,7 +42,6 @@ int main(int argc,char *argv[]) {
     int portTCPser = PORT_TIPIC;
     char TextRes[256];
     SckCon = -1;
-    int n = -1;
     char IPloc[16], IPrem[16];
     int portTCPloc, portTCPrem;
     // variables per obtenir el fitxer
@@ -56,9 +55,8 @@ int main(int argc,char *argv[]) {
     scanf("%d", &portTCPser);
 
     /* Demanem al usuari la IP i el port del servidor                     */
-    while (n == -1){
-        n = UEBc_DemanaConnexio(IPser, portTCPser, TextRes);
-        if (n == -1) {
+    while (SckCon == -1) {
+        if ((SckCon = UEBc_DemanaConnexio(IPser, portTCPser, TextRes)) == -1) {
             printf("Error en demanar la connexio: %s\n", TextRes);
             printf("Torna-ho a provar.\n");
             printf("Direccio IP del servidor UEB: ");
@@ -69,7 +67,6 @@ int main(int argc,char *argv[]) {
     }
 
     printf("%s\n", TextRes);
-    SckCon = n;
 
     /* obtenir les adreces del socket de connexió                                  */
     /* I un cop tinguem el socket i les adreçes locals ja podem demanar el fitxer  */
@@ -116,7 +113,7 @@ int main(int argc,char *argv[]) {
     system(cmd);
 
     // Tancar la connexió
-    if(n = UEBc_TancaConnexio(SckCon, TextRes) == -1){
+    if(SckCon = UEBc_TancaConnexio(SckCon, TextRes) == -1){
         printf("Error en tancar la connexió: %s", TextRes);
         exit(exitError(TextRes));
 
