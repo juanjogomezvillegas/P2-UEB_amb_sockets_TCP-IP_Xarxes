@@ -47,7 +47,7 @@ int main(int argc,char *argv[]) {
     char textRes;
     char iprem[16], iploc[16];
     int portrem, portloc;
-    char buffer[1000];
+    char buffer[10009];
     int bytes_llegits, bytes_escrits;
 
     /* Situació pre-inicial                                               */
@@ -78,13 +78,13 @@ int main(int argc,char *argv[]) {
 
         bytes_llegits = 1;
         while (bytes_llegits > 0) {
-            if ((bytes_llegits = read(scon, buffer, 10000)) == -1) { // S rep del C una peticio UEB i la respon
+            if ((bytes_llegits = read(scon, buffer, 10009)) == -1) { // S rep del C una peticio UEB i la respon
                 Tanca(scon);
                 Tanca(sesc);
                 exit(exitError("Error in read message of the C.\n"));
             }
 
-            printf("%s", buffer);
+            write(1, buffer, bytes_llegits);
 
             if (bytes_llegits > 0) {
                 //UEBs_ServeixPeticio(scon, tipusPeticio, nomFitx, &textRes);

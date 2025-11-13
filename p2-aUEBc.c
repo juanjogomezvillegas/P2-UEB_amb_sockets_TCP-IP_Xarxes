@@ -92,7 +92,7 @@ int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, 
     int long1;
 
     /* Construim el missatge i l'enviem */
-    if ((codiRes = ConstiEnvMis(SckCon, "OBT\0", NomFitx, sizeof(NomFitx))) < 0) {
+    if ((codiRes = ConstiEnvMis(SckCon, "OBT\0", NomFitx, strlen(NomFitx))) < 0) {
         sprintf(TextRes, "Error en ConstiEnvMis: %d", codiRes);
         return codiRes;
     }
@@ -103,12 +103,12 @@ int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, 
         return codiRes;
     }
 
-    if (strcmp(tipus, "COR") == 0) {
+    if (strcmp(tipus, "COR\0") == 0) {
         memcpy(Fitx, info, long1);
         *LongFitx = long1;
         sprintf(TextRes, "Fitxer rebut correctament (%d bytes)", long1);
         return 0;
-    } else if (strcmp(tipus, "ERR") == 0) {
+    } else if (strcmp(tipus, "ERR\0") == 0) {
         sprintf(TextRes, "Error del servidor: %.*s", long1, info);
         return 1;
     } else {
@@ -172,21 +172,9 @@ int UEBc_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */
 
-/* Descripció de la funció, dels arguments, valors de retorn, etc.        */
-/* int UEBc_FuncioExterna(arg1, arg2...)
-{
-	
-} */
-
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer. Les seves declaracions es        */
 /* troben a l'inici d'aquest fitxer.                                      */
-
-/* Descripció de la funció, dels arguments, valors de retorn, etc.        */
-/* int FuncioInterna(arg1, arg2...)
-{
-	
-} */
 
 /* "Construeix" un missatge de PUEB a partir dels seus camps tipus,       */
 /* long1 i info1, escrits, respectivament a "tipus", "long1" i "info1"    */
@@ -204,21 +192,27 @@ int UEBc_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 /* -2 si protocol és incorrecte (longitud camps, tipus de peticio).       */
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 {
-    char buff[10008];
+    char buff[10009];
     char campLong[5];
 
-    if (strlen(tipus) != 4 || long1 < 0 || long1 > 9999)
+    // comprova si hi ha algun error en els camps tipus i info1 en referència a la seva longitud
+    // tipus és de 4 chars, inclòs el \0; info1 pot ser de long1 bytes
+    /*if (strlen(tipus) != 4 || long1 <= 0 || long1 > 9999) {
         return -2;
+    }*/
 
-    sprintf(campLong, "%04d", long1);
+    sprintf(campLong, "%04d", long1); // formatem el camp long1 p.e. com 0004 per un info1 de 4 bytes
+    campLong[sizeof(campLong)] = "\0";
 
+    // construim el missatge
     memcpy(buff, tipus, 4);
     memcpy(buff + 4, campLong, 5);
-    if (long1 > 0)
-        memcpy(buff + 8, info1, long1);
-
-    if (TCP_Envia(SckCon, buff, long1 + 8) == -1)
+    memcpy(buff + 9, info1, long1);
+    
+    // enviem el missatge
+    if (TCP_Envia(SckCon, buff, long1 + 9) == -1) {
         return -1;
+    }
 
     return 0;
 }
