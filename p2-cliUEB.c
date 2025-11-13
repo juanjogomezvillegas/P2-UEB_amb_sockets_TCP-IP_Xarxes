@@ -44,8 +44,8 @@ int main(int argc,char *argv[]) {
     /* Declaració de variables                                            */
     int option;
     char textRes;
-    char ipSer[16];
-    int portSer = PORT_TIPIC;
+    char ipSer[16], vellaIpSer[16];
+    int portSer, vellPortSer = PORT_TIPIC;
     char IPloc[16], IPrem[16];
     int portloc, portrem;
     // variables per obtenir el fitxer
@@ -53,79 +53,98 @@ int main(int argc,char *argv[]) {
     char Fitxer[10000];   // buffer per rebre el fitxer
     int longFitxer;
 
-    /* Situació inicial                                                   */
-    printf("Què vols fer [obtenir -> 1|sortir -> 0]?");
-    scanf("%d", &option);
+    bool sortir, connexioIgual = false;
+    while (sortir == false) {
+        memcpy(vellaIpSer, ipSer, sizeof(ipSer));
+        vellPortSer = portSer;
 
-    if (option == 1) { // l'usuari vol obtenir un fitxer
+        /* Situació inicial                                                   */
+        printf("Què vols fer [obtenir -> 1|sortir -> 0]?");
+        scanf("%d", &option);
 
-        /* El C crea el seu socket en un #port TCP qualsevol i, demana al S la connexió TCP */
-        
-        do {
-            // demana la IP del servidor
-            printf("Entra l'@IP del servidor UEB: \n");
-            scanf("%63s", ipSer);
-            // demana la port del servidor
-            printf("Entra el #Port del servidor UEB [0 pel port típic]: \n");
-            scanf("%d", &portSer);
-            if (portSer == 0) { // si entra 0 assigna el port típic
-                portSer = PORT_TIPIC;
+        if (option == 1) { // l'usuari vol obtenir un fitxer
+
+            /* El C crea el seu socket en un #port TCP qualsevol i, demana al S la connexió TCP */
+            
+            connexioIgual = false;
+            do {
+                // demana la IP del servidor
+                printf("Entra l'@IP del servidor UEB: \n");
+                scanf("%63s", ipSer);
+                // demana la port del servidor
+                printf("Entra el #Port del servidor UEB [0 pel port típic]: \n");
+                scanf("%d", &portSer);
+                if (portSer == 0) { // si entra 0 assigna el port típic
+                    portSer = PORT_TIPIC;
+                }
+                if (SckCon > 0 && memcmp(ipSer, vellaIpSer, sizeof(ipSer)) == 0 && portSer == vellPortSer) {
+                    connexioIgual = true;
+                } else {
+                    if (SckCon > 0) {
+                        Tanca(SckCon);
+                    }
+                    if ((SckCon = UEBc_DemanaConnexio(ipSer, portSer, &textRes)) == -1) {
+                        printf("%s\n", &textRes);
+                    }
+                }
+            } while (SckCon == -1);
+
+            /* dins la connexió TCP establerta, el C envia al S la petició UEB                    */
+
+            do {
+                // demana el nom del fitxer que vol obtenir del servidor
+                printf("Entra el nom d'un fitxer [ha de començar per \"/\"]: \n");
+                scanf("%255s", nomFitxer);
+                if (nomFitxer[0] != '/') {
+                    perror("El nom d'un fitxer ha de començar per \"/\".\n");
+                }
+            } while (nomFitxer[0] != '/');
+
+            if (UEBc_TrobaAdrSckConnexio(SckCon, IPloc, &portloc, IPrem, &portrem, &textRes) == -1) {
+                printf("Error en obtenir les adreçes del socket de connexio: %s\n", &textRes);
+                Tanca(SckCon);
+                exit(exitError(&textRes));
             }
-            if ((SckCon = UEBc_DemanaConnexio(ipSer, portSer, &textRes)) == -1) {
-                printf("%s\n", &textRes);
+
+            // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+            printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
+
+            /* Crida a la funció per sol·licitar el fitxer i rebre'l                                */
+            if (UEBc_ObteFitxer(SckCon, nomFitxer, Fitxer, &longFitxer, &textRes) == -1) {
+                printf("Error en obtenir el fitxer: %s\n", &textRes);
+                Tanca(SckCon);
+                exit(exitError(&textRes));
             }
-        } while (SckCon == -1);
 
-        /* dins la connexió TCP establerta, el C envia al S la petició UEB                    */
+            printf("Fitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
+            
+            char nomLocal[128];
+            sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
+            FILE *f = fopen(nomLocal, "wb");
+            if (f == NULL) {
+                perror("No s'ha pogut crear el fitxer local");
+                Tanca(SckCon);
+                exit(exitError(textRes));
+            }
 
-        // demana el nom del fitxer que vol obtenir del servidor
-        printf("Entra el nom d'un fitxer [ha de començar per \"/\"]: \n");
-        scanf("%255s", nomFitxer);
+            // Escriure el contingut rebut al fitxer local
+            fwrite(Fitxer, 1, longFitxer, f);
+            fclose(f);
+            printf("Fitxer desat com a %s\n", nomLocal);
 
-        if (UEBc_TrobaAdrSckConnexio(SckCon, IPloc, &portloc, IPrem, &portrem, &textRes) == -1) {
-            printf("Error en obtenir les adreçes del socket de connexio: %s\n", &textRes);
-            Tanca(SckCon);
-            exit(exitError(&textRes));
+            // Obrir el fitxer rebut amb el navegador per defecte del sistema
+            char cmd[200];
+            sprintf(cmd, "xdg-open %s", nomLocal);
+            system(cmd);
+        } else if (option == 0) { // l'usuari vol sortir
+            sortir = true;
         }
+    }
 
-        // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-        printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
-
-        /* Crida a la funció per sol·licitar el fitxer i rebre'l                                */
-        if (UEBc_ObteFitxer(SckCon, nomFitxer, Fitxer, &longFitxer, &textRes) == -1) {
-            printf("Error en obtenir el fitxer: %s\n", &textRes);
-            Tanca(SckCon);
-            exit(exitError(&textRes));
-        }
-
-        printf("Fitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
-        
-        /*char nomLocal[128];
-        sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
-        FILE *f = fopen(nomLocal, "wb");
-        if (f == NULL) {
-            perror("No s'ha pogut crear el fitxer local");
-            Tanca(SckCon);
-            exit(exitError(textRes));
-        }
-
-        // Escriure el contingut rebut al fitxer local
-        fwrite(Fitxer, 1, longFitxer, f);
-        fclose(f);
-        printf("Fitxer desat com a %s\n", nomLocal);
-
-        // Obrir el fitxer rebut amb el navegador per defecte del sistema
-        char cmd[200];
-        sprintf(cmd, "xdg-open %s", nomLocal);
-        system(cmd);*/
-
-        // Tancar la connexió
-        if(UEBc_TancaConnexio(SckCon, &textRes) == -1) {
-            printf("Error en tancar la connexió: %s", &textRes);
-            exit(exitError(&textRes));
-        }
-    } else if (option == 0) { // l'usuari vol sortir
-        aturadaC(0);
+    // Tancar la connexió
+    if(UEBc_TancaConnexio(SckCon, &textRes) == -1) {
+        printf("Error en tancar la connexió: %s", &textRes);
+        exit(exitError(&textRes));
     }
 
     return 0;
@@ -163,10 +182,9 @@ int exitError(char* textRes) {
 /* Retorna:                                                                    */
 /*  void                                                                       */
 void Tanca(int Sck) {
-char TextRes[200];
+    char* TextRes;
     if (UEBc_TancaConnexio(Sck, TextRes) == -1) {
         exit(exitError(TextRes));
-
     }
 }
 
