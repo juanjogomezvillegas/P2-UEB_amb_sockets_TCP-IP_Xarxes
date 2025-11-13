@@ -74,16 +74,17 @@ int main(int argc,char *argv[]) {
             exit(exitError(&textRes));
         }
 
-        printf("S'ha connectat un C en el socket @IP=%s;#port=%d\n", iprem, portrem);
-        printf("Socket local @IP=%s;#port=%d\n", iploc, portloc);
+        printf("\nSocket local @IP=%s;#port=%d.\nS'ha connectat un C amb @IP=%s;#port=%d.\n", iploc, portloc, iprem, portrem);
 
         bytes_llegits = 1;
         while (bytes_llegits > 0) {
-            if ((bytes_llegits = read(scon, buffer, 1000)) == -1) { // S rep del C una peticio UEB i la respon
+            if ((bytes_llegits = read(scon, buffer, 10000)) == -1) { // S rep del C una peticio UEB i la respon
                 Tanca(scon);
                 Tanca(sesc);
                 exit(exitError("Error in read message of the C.\n"));
             }
+
+            printf("%s", buffer);
 
             if (bytes_llegits > 0) {
                 //UEBs_ServeixPeticio(scon, tipusPeticio, nomFitx, &textRes);

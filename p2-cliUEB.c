@@ -116,9 +116,9 @@ int main(int argc,char *argv[]) {
                 exit(exitError(&textRes));
             }
 
-            printf("Fitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
+            printf("\nFitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
             
-            char nomLocal[128];
+            /*char nomLocal[128];
             sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
             FILE *f = fopen(nomLocal, "wb");
             if (f == NULL) {
@@ -135,7 +135,7 @@ int main(int argc,char *argv[]) {
             // Obrir el fitxer rebut amb el navegador per defecte del sistema
             char cmd[200];
             sprintf(cmd, "xdg-open %s", nomLocal);
-            system(cmd);
+            system(cmd);*/
         } else if (option == 0) { // l'usuari vol sortir
             sortir = true;
         }

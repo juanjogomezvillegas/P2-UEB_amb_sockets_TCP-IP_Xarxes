@@ -85,32 +85,30 @@ int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *TextRes)
 /* -3 si l'altra part tanca la connexió.                                  */
 int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, char *TextRes)
 {
-    /*Declarem les variables necessaries*/
+    /* Declarem les variables necessaries */
 	int codiRes;
-    char tipus[5];
+    char tipus[4];
     char info[10000];
     int long1;
 
-    /*Construim el missatge i l'enviem*/
-    codiRes = ConstiEnvMis(SckCon, "OBTE", NomFitx, strlen(NomFitx));
-    if (codiRes < 0) {
+    /* Construim el missatge i l'enviem */
+    if ((codiRes = ConstiEnvMis(SckCon, "OBT\0", NomFitx, sizeof(NomFitx))) < 0) {
         sprintf(TextRes, "Error en ConstiEnvMis: %d", codiRes);
         return codiRes;
     }
 
-    /*Rebem el missatge de resposta i el desconstruim*/
-    codiRes = RepiDesconstMis(SckCon, tipus, info, &long1);
-    if (codiRes < 0) {
+    /* Rebem el missatge de resposta i el desconstruim */
+    if ((codiRes = RepiDesconstMis(SckCon, tipus, info, &long1)) < 0) {
         sprintf(TextRes, "Error en RepiDesconstMis: %d", codiRes);
         return codiRes;
     }
 
-    if (strcmp(tipus, "DATA") == 0) {
+    if (strcmp(tipus, "COR") == 0) {
         memcpy(Fitx, info, long1);
         *LongFitx = long1;
         sprintf(TextRes, "Fitxer rebut correctament (%d bytes)", long1);
         return 0;
-    } else if (strcmp(tipus, "ERRR") == 0) {
+    } else if (strcmp(tipus, "ERR") == 0) {
         sprintf(TextRes, "Error del servidor: %.*s", long1, info);
         return 1;
     } else {
@@ -213,12 +211,13 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
         return -2;
 
     sprintf(campLong, "%04d", long1);
+
     memcpy(buff, tipus, 4);
-    memcpy(buff + 4, campLong, 4);
+    memcpy(buff + 4, campLong, 5);
     if (long1 > 0)
         memcpy(buff + 8, info1, long1);
 
-    if (TCP_Envia(SckCon, buff, 8 + long1) == -1)
+    if (TCP_Envia(SckCon, buff, long1 + 8) == -1)
         return -1;
 
     return 0;
