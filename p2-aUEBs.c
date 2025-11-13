@@ -184,7 +184,7 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 	char buff[10008];
     char campLong[4];
 
-    if (strlen(tipus) != 4 || long1 < 0 || long1 > 9999)
+    /*if (strlen(tipus) != 4 || long1 < 0 || long1 > 9999)
         return -2;
     
     sprintf(campLong, "%04d", long1);
@@ -196,7 +196,7 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 
     if (TCP_Envia(SckCon, buff, 8 + long1) == -1) {
         return -1;
-    }
+    }*/
 
     return 0;
 }
@@ -226,7 +226,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
         return (ret == 0) ? -3 : -1;
     }
 
-    memcpy(tipus, bufCap, 4);
+    /*memcpy(tipus, bufCap, 4);
     tipus[4] = '\0';
 
     char campLong[5];
@@ -243,7 +243,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
         if (ret <= 0) {
             return (ret == 0) ? -3 : -1;
         }
-    }
+    }*/
 
     return 0;
 }
