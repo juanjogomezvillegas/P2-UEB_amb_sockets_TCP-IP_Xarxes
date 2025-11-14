@@ -192,25 +192,25 @@ int UEBc_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 /* -2 si protocol és incorrecte (longitud camps, tipus de peticio).       */
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 {
-    char buff[10009];
+    char buff[10007];
     char campLong[5];
 
     // comprova si hi ha algun error en els camps tipus i info1 en referència a la seva longitud
     // tipus és de 4 chars, inclòs el \0; info1 pot ser de long1 bytes
-    /*if (strlen(tipus) != 4 || long1 <= 0 || long1 > 9999) {
+    if (strlen(tipus) != 3 || long1 <= 0 || long1 > 9999) {
         return -2;
-    }*/
+    }
 
     sprintf(campLong, "%04d", long1); // formatem el camp long1 p.e. com 0004 per un info1 de 4 bytes
     campLong[sizeof(campLong)] = "\0";
 
     // construim el missatge
-    memcpy(buff, tipus, 4);
-    memcpy(buff + 4, campLong, 5);
-    memcpy(buff + 9, info1, long1);
+    memcpy(buff, tipus, 3);
+    memcpy(buff + 3, campLong, 4);
+    memcpy(buff + 7, info1, long1);
     
     // enviem el missatge
-    if (TCP_Envia(SckCon, buff, long1 + 9) == -1) {
+    if (TCP_Envia(SckCon, buff, long1 + 7) == -1) {
         return -1;
     }
 

@@ -59,7 +59,7 @@ int main(int argc,char *argv[]) {
         vellPortSer = portSer;
 
         /* Situació inicial                                                   */
-        printf("Què vols fer [obtenir -> 1|sortir -> 0]?");
+        printf("Què vols fer [obtenir -> 1|sortir -> 0]? ");
         scanf("%d", &option);
 
         if (option == 1) { // l'usuari vol obtenir un fitxer

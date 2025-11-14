@@ -47,8 +47,9 @@ int main(int argc,char *argv[]) {
     char textRes;
     char iprem[16], iploc[16];
     int portrem, portloc;
-    char buffer[10009];
-    int bytes_llegits, bytes_escrits;
+    int retornPeticio;
+    char tipus[4];
+    char nomFitxer[10000];
 
     /* Situació pre-inicial                                               */
 
@@ -76,19 +77,19 @@ int main(int argc,char *argv[]) {
 
         printf("\nSocket local @IP=%s;#port=%d.\nS'ha connectat un C amb @IP=%s;#port=%d.\n", iploc, portloc, iprem, portrem);
 
-        bytes_llegits = 1;
-        while (bytes_llegits > 0) {
-            if ((bytes_llegits = read(scon, buffer, 10009)) == -1) { // S rep del C una peticio UEB i la respon
-                Tanca(scon);
-                Tanca(sesc);
-                exit(exitError("Error in read message of the C.\n"));
-            }
+        retornPeticio = 0;
+        while (retornPeticio != -3) {
+            // rep i serveix la petició
+            retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, &textRes);
+            
+            if (retornPeticio != -3) {
+                printf("%d", retornPeticio);
 
-            write(1, buffer, bytes_llegits);
-
-            if (bytes_llegits > 0) {
-                //UEBs_ServeixPeticio(scon, tipusPeticio, nomFitx, &textRes);
-
+                /*if (strcmp(tipus, "OBT\0") == 0) {
+                    // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                    printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
+                }*/
+            
                 // al S, la carpeta / o arrel del lloc UEB, correspon a la carpeta on s'executa el S
                 // es mostra per pantalla la peticio: "obtenir", nom_fitxer, @socket(@IP:#Port) de C i S
                 // i si el fitxer s'ha servit bé o no existia (o altres errors)

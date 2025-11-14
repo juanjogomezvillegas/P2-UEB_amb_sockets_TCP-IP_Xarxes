@@ -18,6 +18,8 @@
 #include "p2-tTCP.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 /* Definició de constants, p.e.,                                          */
 
@@ -100,7 +102,41 @@ int UEBs_AcceptaConnexio(int SckEsc, char *TextRes)
 /*  comença per /, fitxer no es pot llegir, fitxer massa gran, etc.).     */
 int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *TextRes)
 {
-	//
+    /* Declarem les variables necessaries */
+	int codiRes;
+    char info[10000];
+    int long1;
+
+    /* Rebem el missatge de resposta i el desconstruim */
+	if ((codiRes = RepiDesconstMis(SckCon, TipusPeticio, NomFitx, &long1)) < 0) {
+        sprintf(TextRes, "Error en RepiDesconstMis: %d", codiRes);
+        return codiRes;
+    }
+
+    if (NomFitx[0] != '/') { // si el nom del fitxer no conté la "/" inicial -> error -4
+        return -4;
+    }
+
+    memmove(NomFitx, NomFitx + 1, strlen(NomFitx));
+    FILE *fd = fopen(NomFitx, "r");
+    if (fd != NULL) { // si fitxer no existeix -> error 1
+        fclose(fd);
+        /* Construim el missatge i l'enviem */
+        char* message = "Fitxer no trobat";
+        if ((codiRes = ConstiEnvMis(SckCon, "ERR\0", message, strlen(message))) < 0) {
+            sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
+            return codiRes;
+        }
+        return 1;
+    } else { // el fitxer existeix
+        if ((codiRes = ConstiEnvMis(SckCon, "COR\0", NomFitx, strlen(NomFitx))) < 0) {
+            sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
+            return codiRes;
+        }
+        return 0;
+    }
+
+    /* Construim el missatge i l'enviem */
 }
 
 /* Tanca la connexió TCP d'identificador "SckCon".                        */
@@ -181,22 +217,27 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 /* -2 si protocol és incorrecte (longitud camps, tipus de peticio).       */
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 {
-	char buff[10008];
-    char campLong[4];
+	char buff[10007];
+    char campLong[5];
 
-    /*if (strlen(tipus) != 4 || long1 < 0 || long1 > 9999)
+    // comprova si hi ha algun error en els camps tipus i info1 en referència a la seva longitud
+    // tipus és de 4 chars, inclòs el \0; info1 pot ser de long1 bytes
+    if (strlen(tipus) != 3 || long1 <= 0 || long1 > 9999) {
         return -2;
-    
-    sprintf(campLong, "%04d", long1);
-    memcpy(buff, tipus, 4);
-    memcpy(buff + 4, campLong, 4);
-    if (long1 > 0) {
-        memcpy(buff + 8, info1, long1);
     }
 
-    if (TCP_Envia(SckCon, buff, 8 + long1) == -1) {
+    sprintf(campLong, "%04d", long1); // formatem el camp long1 p.e. com 0004 per un info1 de 4 bytes
+    campLong[sizeof(campLong)] = "\0";
+
+    // construim el missatge
+    memcpy(buff, tipus, 3);
+    memcpy(buff + 3, campLong, 4);
+    memcpy(buff + 7, info1, long1);
+    
+    // enviem el missatge
+    if (TCP_Envia(SckCon, buff, long1 + 7) == -1) {
         return -1;
-    }*/
+    }
 
     return 0;
 }
@@ -218,32 +259,29 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 /* -3 si l'altra part tanca la connexió.                                  */
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 {
-	char bufCap[8];
-    int ret;
+    int bytesLlegits;
+	char buff[10007];
+    char tipusLoc[4];
+    char long1Loc[5];
+    char info1Loc[10000];
 
-    ret = TCP_Rep(SckCon, bufCap, 8);
-    if (ret <= 0) {
-        return (ret == 0) ? -3 : -1;
+    if ((bytesLlegits = TCP_Rep(SckCon, buff, 10007)) <= 0) {
+        return (bytesLlegits == 0)? -3 : -1;
     }
 
-    /*memcpy(tipus, bufCap, 4);
-    tipus[4] = '\0';
+    memcpy(tipusLoc, buff, 3);
+    tipusLoc[4] = "\0";
+    memcpy(long1Loc, buff + 3, 4);
+    long1Loc[5] = "\0";
+    memcpy(info1Loc, buff + 7, bytesLlegits-7);
 
-    char campLong[5];
-    memcpy(campLong, bufCap + 4, 4);
-    campLong[4] = '\0';
-    *long1 = atoi(campLong);
-
-    if (*long1 < 0 || *long1 > 9999) {
+    if (strlen(tipusLoc) != 3 || strcmp(tipusLoc, "OBT") != 0 || atoi(long1Loc) <= 0 || atoi(long1Loc) > 9999) {
         return -2;
     }
 
-    if (*long1 > 0) {
-        ret = TCP_Rep(SckCon, info1, *long1);
-        if (ret <= 0) {
-            return (ret == 0) ? -3 : -1;
-        }
-    }*/
+    memcpy(tipus, tipusLoc, 4);
+    *long1 = atoi(long1Loc);
+    memcpy(info1, info1Loc, bytesLlegits-7);
 
     return 0;
 }
