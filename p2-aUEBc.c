@@ -235,7 +235,7 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 {
 	int bytesLlegits;
-	char buff[10007];
+	char buff[100007];
     char tipusLoc[4];
     char long1Loc[5];
     char info1Loc[10000];

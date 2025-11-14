@@ -104,7 +104,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
 {
     /* Declarem les variables necessaries */
 	int codiRes;
-    char info[1000], linia[1000];
+    char info[10000], linia[10000];
     int long1;
     char nomfitxer[1000];
 
@@ -268,7 +268,7 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 {
     int bytesLlegits;
-	char buff[10007];
+	char buff[100007];
     char tipusLoc[4];
     char long1Loc[5];
     char info1Loc[10000];
