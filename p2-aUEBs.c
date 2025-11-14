@@ -106,6 +106,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
 	int codiRes;
     char info[1000], linia[1000];
     int long1;
+    char nomfitxer[1000];
 
     /* Rebem el missatge de resposta i el desconstruim */
 	if ((codiRes = RepiDesconstMis(SckCon, TipusPeticio, NomFitx, &long1)) < 0) {
@@ -114,12 +115,14 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     }
 
     if (NomFitx[0] != '/') { // si el nom del fitxer no conté la "/" inicial -> error -4
+        sprintf(TextRes, "Error amb el fitxer de la petició");
         return -4;
     }
 
-    memmove(NomFitx, NomFitx + 1, strlen(NomFitx)); // elimina la / inicial per poder fer l'open
+    memcpy(nomfitxer, NomFitx, strlen(NomFitx));
+    memmove(nomfitxer, nomfitxer + 1, strlen(nomfitxer)); // elimina la / inicial per poder fer l'open
 
-    FILE* fd = fopen(NomFitx, "r");
+    FILE* fd = fopen(nomfitxer, "r");
     if (fd == NULL) { // si fitxer no existeix -> error 1
         /* Construim el missatge i l'enviem */
         char* message = "Fitxer no trobat";

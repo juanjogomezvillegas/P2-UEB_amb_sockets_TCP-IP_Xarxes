@@ -78,24 +78,30 @@ int main(int argc,char *argv[]) {
         printf("\nSocket local @IP=%s;#port=%d.\nS'ha connectat un C amb @IP=%s;#port=%d.\n", iploc, portloc, iprem, portrem);
 
         retornPeticio = 0;
-        while (retornPeticio != -3) {
+        while (retornPeticio != -3 && retornPeticio != -2) {
             // rep i serveix la petició
-            retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, &textRes);
-            
-            if (retornPeticio != -3) {
-                printf("%d", retornPeticio);
+            if ((retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, &textRes)) == -1) {
+                Tanca(sesc);
+                Tanca(scon);
+                exit(exitError(&textRes));
+            }
 
-                /*if (strcmp(tipus, "OBT\0") == 0) {
-                    // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-                    printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
-                }*/
-            
-                // al S, la carpeta / o arrel del lloc UEB, correspon a la carpeta on s'executa el S
-                // es mostra per pantalla la peticio: "obtenir", nom_fitxer, @socket(@IP:#Port) de C i S
-                // i si el fitxer s'ha servit bé o no existia (o altres errors)
-                
+            if (retornPeticio == -2) {
+                printf("\n%s\n", &textRes);
             } else {
-                printf("C desconnectat\n");
+                if (retornPeticio != -3) {
+                    if (retornPeticio == 0) {
+                        // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                        printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
+                    } else if (retornPeticio == 1) {
+                        // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                        printf("\nerror, fitxer %s no trobat, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
+                    } else {
+                        printf("\n%s\n", &textRes);
+                    }
+                } else {
+                    printf("\nC desconnectat\n");
+                }
             }
         }
     }

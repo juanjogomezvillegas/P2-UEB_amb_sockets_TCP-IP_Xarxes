@@ -234,26 +234,29 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 /* -3 si l'altra part tanca la connexió.                                  */
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 {
-	char bufCap[8];
-    int ret;
+	int bytesLlegits;
+	char buff[10007];
+    char tipusLoc[4];
+    char long1Loc[5];
+    char info1Loc[10000];
 
-    ret = TCP_Rep(SckCon, bufCap, 8);
-    if (ret <= 0) return (ret == 0) ? -3 : -1;
-
-    memcpy(tipus, bufCap, 4);
-    tipus[4] = '\0';
-
-    char campLong[5];
-    memcpy(campLong, bufCap + 4, 4);
-    campLong[4] = '\0';
-    *long1 = atoi(campLong);
-
-    if (*long1 < 0 || *long1 > 9999) return -2;
-
-    if (*long1 > 0) {
-        ret = TCP_Rep(SckCon, info1, *long1);
-        if (ret <= 0) return (ret == 0) ? -3 : -1;
+    if ((bytesLlegits = TCP_Rep(SckCon, buff, 10007)) <= 0) {
+        return (bytesLlegits == 0)? -3 : -1;
     }
+
+    memcpy(tipusLoc, buff, 3);
+    tipusLoc[4] = "\0";
+    memcpy(long1Loc, buff + 3, 4);
+    long1Loc[5] = "\0";
+    memcpy(info1Loc, buff + 7, bytesLlegits-7);
+
+    if (strlen(tipusLoc) != 3 || strcmp(tipusLoc, "OBT") != 0 || atoi(long1Loc) <= 0 || atoi(long1Loc) > 9999) {
+        return -2;
+    }
+
+    memcpy(tipus, tipusLoc, 4);
+    *long1 = atoi(long1Loc);
+    memcpy(info1, info1Loc, bytesLlegits-7);
 
     return 0;
 }
