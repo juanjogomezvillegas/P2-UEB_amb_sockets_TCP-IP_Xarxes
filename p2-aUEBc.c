@@ -252,7 +252,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 
     memcpy(info1Loc, buff + 7, bytesLlegits-7);
 
-    if (strlen(tipusLoc) != 3 || strcmp(tipusLoc, "OBT") != 0 || atoi(long1Loc) <= 0 || atoi(long1Loc) > 9999) {
+    if (strlen(tipusLoc) != 3 || atoi(long1Loc) <= 0 || atoi(long1Loc) > 9999) {
         return -2;
     }
 
