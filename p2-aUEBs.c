@@ -106,7 +106,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
 	int codiRes;
     char info[10000], linia[10000];
     int long1;
-    char nomfitxer[1000];
+    char nomfitxer[10000];
 
     /* Rebem el missatge de resposta i el desconstruim */
 	if ((codiRes = RepiDesconstMis(SckCon, TipusPeticio, NomFitx, &long1)) < 0) {
@@ -234,8 +234,8 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
         return -2;
     }
 
-    sprintf(campLong, "%04d", long1); // formatem el camp long1 p.e. com 0004 per un info1 de 4 bytes
-    campLong[sizeof(campLong)] = "\0";
+    sprintf(campLong, "%.4d", long1); // formatem el camp long1 p.e. com 0004 per un info1 de 4 bytes
+    campLong[sizeof(campLong)] = '\0';
 
     // construim el missatge
     memcpy(buff, tipus, 3);
@@ -268,7 +268,7 @@ int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 {
     int bytesLlegits;
-	char buff[100007];
+	char buff[10007];
     char tipusLoc[4];
     char long1Loc[5];
     char info1Loc[10000];
@@ -278,9 +278,11 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
     }
 
     memcpy(tipusLoc, buff, 3);
-    tipusLoc[4] = "\0";
+    tipusLoc[3] = '\0';
+
     memcpy(long1Loc, buff + 3, 4);
-    long1Loc[5] = "\0";
+    long1Loc[4] = '\0';
+
     memcpy(info1Loc, buff + 7, bytesLlegits-7);
 
     if (strlen(tipusLoc) != 3 || strcmp(tipusLoc, "OBT") != 0 || atoi(long1Loc) <= 0 || atoi(long1Loc) > 9999) {
