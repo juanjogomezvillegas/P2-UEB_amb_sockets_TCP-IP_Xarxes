@@ -104,7 +104,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
 {
     /* Declarem les variables necessaries */
 	int codiRes;
-    char info[10000];
+    char info[1000], linia[1000];
     int long1;
 
     /* Rebem el missatge de resposta i el desconstruim */
@@ -117,10 +117,10 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
         return -4;
     }
 
-    memmove(NomFitx, NomFitx + 1, strlen(NomFitx));
-    FILE *fd = fopen(NomFitx, "r");
-    if (fd != NULL) { // si fitxer no existeix -> error 1
-        fclose(fd);
+    memmove(NomFitx, NomFitx + 1, strlen(NomFitx)); // elimina la / inicial per poder fer l'open
+
+    FILE* fd = fopen(NomFitx, "r");
+    if (fd == NULL) { // si fitxer no existeix -> error 1
         /* Construim el missatge i l'enviem */
         char* message = "Fitxer no trobat";
         if ((codiRes = ConstiEnvMis(SckCon, "ERR\0", message, strlen(message))) < 0) {
@@ -129,14 +129,19 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
         }
         return 1;
     } else { // el fitxer existeix
-        if ((codiRes = ConstiEnvMis(SckCon, "COR\0", NomFitx, strlen(NomFitx))) < 0) {
+        /* llegim el fitxer */
+        int pos = 0;
+        while (fgets(linia, sizeof(linia), fd) != NULL) {
+            memcpy(info + pos, linia, strlen(linia));
+            pos += strlen(linia);
+        }
+        /* Construim el missatge amb el fitxer i l'enviem */
+        if ((codiRes = ConstiEnvMis(SckCon, "COR\0", info, strlen(info))) < 0) {
             sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
             return codiRes;
         }
         return 0;
     }
-
-    /* Construim el missatge i l'enviem */
 }
 
 /* Tanca la connexió TCP d'identificador "SckCon".                        */
