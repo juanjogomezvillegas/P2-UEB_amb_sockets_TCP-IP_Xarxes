@@ -20,7 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
-#include <time.h>
+#include <sys/time.h>
 
 /* Definició de constants, p.e.,                                          */
 
@@ -43,6 +43,7 @@ int main(int argc,char *argv[]) {
     PORT_TIPIC = readPortTipic(FILE_PORT_TIPIC);
 
     /* Declaració de variables                                            */
+    struct timeval time_ini_resposta, time_fi_resposta, time_ini_envia, time_fi_envia;
     int option;
     char textRes;
     char ipSer[16], vellaIpSer[16];
@@ -65,7 +66,7 @@ int main(int argc,char *argv[]) {
 
         if (option == 1) { // l'usuari vol obtenir un fitxer
 
-            time_t time_resposta_ini = time(NULL);
+            gettimeofday(&time_ini_resposta, NULL);
 
             /* El C crea el seu socket en un #port TCP qualsevol i, demana al S la connexió TCP */
             connexioIgual = false;
@@ -111,7 +112,7 @@ int main(int argc,char *argv[]) {
             // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
             printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
 
-            time_t time_enviament_ini = time(NULL);
+            gettimeofday(&time_ini_envia, NULL);
 
             /* Crida a la funció per sol·licitar el fitxer i rebre'l                                */
             if (UEBc_ObteFitxer(SckCon, nomFitxer, Fitxer, &longFitxer, &textRes) == -1) {
@@ -122,13 +123,16 @@ int main(int argc,char *argv[]) {
 
             printf("\nFitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
 
-            time_t time_enviament_fi = time(NULL);
-            
-            time_t time_resposta_fi = time(NULL);
+            gettimeofday(&time_fi_envia, NULL);
 
-            printf("\nTemps d'enviament: %.2f segons\n", difftime(time_enviament_fi,time_enviament_ini));
-            printf("Temps de resposta: %.2f segons\n", difftime(time_resposta_fi,time_resposta_ini));
-            printf("Velocitat efectiva: %.2f bits/segon\n", ((longFitxer*8)/difftime(time_enviament_fi,time_enviament_ini)));
+            gettimeofday(&time_fi_resposta, NULL);
+
+            double temps_envia = (time_fi_envia.tv_sec - time_ini_envia.tv_sec) + (time_fi_envia.tv_usec - time_ini_envia.tv_usec) / 1000000.0;
+            double temps_resposta = (time_fi_resposta.tv_sec - time_ini_resposta.tv_sec) + (time_fi_resposta.tv_usec - time_ini_resposta.tv_usec) / 1000000.0;
+
+            printf("\nTemps d'enviament: %.6f segons\n", temps_envia);
+            printf("Temps de resposta: %.6f segons\n", temps_resposta);
+            printf("Velocitat efectiva: %.6f bits/segon\n", ((longFitxer*8)/temps_envia));
 
             /*char nomLocal[128];
             sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
