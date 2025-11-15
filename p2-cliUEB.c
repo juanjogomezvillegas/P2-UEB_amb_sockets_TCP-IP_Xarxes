@@ -121,6 +121,8 @@ int main(int argc,char *argv[]) {
                 exit(exitError(&textRes));
             }
 
+            printf("\n%s\n", Fitxer);
+
             printf("\nFitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
 
             gettimeofday(&time_fi_envia, NULL);
