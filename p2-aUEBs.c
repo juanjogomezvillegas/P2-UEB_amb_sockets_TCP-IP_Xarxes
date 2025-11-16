@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 /* Definició de constants, p.e.,                                          */
 
@@ -27,8 +28,10 @@
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
 
+int ReadPortAndArrel(char* file_cfg, char* arrel_lloc_ueb, char *TextRes);
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1);
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
+int ReadiEnvFit(int SckCon, char *nomFitxer, char *TextRes);
 
 /* Definició de funcions EXTERNES, és a dir, d'aquelles que es cridaran   */
 /* des d'altres fitxers, p.e., int UEBs_FuncioExterna(arg1, arg2...) { }  */
@@ -119,32 +122,19 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
         return -4;
     }
 
-    memcpy(nomfitxer, NomFitx, strlen(NomFitx));
-    memmove(nomfitxer, nomfitxer + 1, strlen(nomfitxer)); // elimina la / inicial per poder fer l'open
+    // concatena l'arrel del lloc UEB al fitxer abans d'obrir-lo
+    char arrel[10000];
+    int port = ReadPortAndArrel("p2-serUEB.cfg", arrel, TextRes);
 
-    FILE* fd = fopen(nomfitxer, "r");
-    if (fd == NULL) { // si fitxer no existeix -> error 1
-        /* Construim el missatge i l'enviem */
-        char* message = "Fitxer no trobat";
-        if ((codiRes = ConstiEnvMis(SckCon, "ERR\0", message, strlen(message))) < 0) {
-            sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
-            return codiRes;
-        }
-        return 1;
-    } else { // el fitxer existeix
-        /* llegim el fitxer */
-        int pos = 0;
-        while (fgets(linia, sizeof(linia), fd) != NULL) {
-            memcpy(info + pos, linia, strlen(linia));
-            pos += strlen(linia);
-        }
-        /* Construim el missatge amb el fitxer i l'enviem */
-        if ((codiRes = ConstiEnvMis(SckCon, "COR\0", info, strlen(info))) < 0) {
-            sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
-            return codiRes;
-        }
-        return 0;
-    }
+    memcpy(nomfitxer, arrel, strlen(arrel));
+    memcpy(nomfitxer + strlen(arrel), NomFitx, strlen(NomFitx));
+
+    // codi per l'anterior versió on l'arrel era la carpeta que s'executa
+    //memcpy(nomfitxer, NomFitx, strlen(NomFitx));
+    //memmove(nomfitxer, nomfitxer + 1, strlen(nomfitxer)); // elimina la / inicial per poder fer l'open
+
+    // llegeix el fitxer demanat i l'envia
+    return ReadiEnvFit(SckCon, nomfitxer, TextRes);
 }
 
 /* Tanca la connexió TCP d'identificador "SckCon".                        */
@@ -202,8 +192,42 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
     return 0;
 }
 
-/* Si ho creieu convenient, feu altres funcions EXTERNES                  */
+/* Llegeix el port tipic UEB del fitxer entrat per paramètre              */
+/* i el retorna.                                                          */
+/*                                                                        */
+/* Paràmetre file_cfg, correspon a un string que conté el nom del fitxer  */
+/* p2-serUEB.cfg, o un altre nom amb extensió .cfg                        */
+/* Paràmetre arrel_lloc_ueb, correspon a l'arrel del lloc ueb             */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  el port tipic llegit si tot va bé;                                    */
+/* -1 si hi ha error.                                                     */
+int ReadPortAndArrel(char* file_cfg, char* arrel_lloc_ueb, char *TextRes)
+{
+    // declaració de variables
+    FILE *file;
+    char line[256];
+    int port = -1;
 
+    // obre el fitxer cfg
+    file = fopen(file_cfg, "r");
+    if (file == NULL) { // retorna -1 si hi ha error
+        sprintf(TextRes, "Error en obrir el fitxer!");
+        return -1;
+    }
+    
+    // si tot va bé, cerca la línia "numportTCP P", i finalment només retornarà "P"
+    bool fi = false;
+    while (fgets(line, sizeof(line), file) && !fi) {
+        if (strncmp(line, "numportTCP", 10) == 0) {
+            sscanf(line+11, "%d", &port);
+        } else if (strncmp(line, "Arrel", 5) == 0) {
+            sscanf(line+6, "%s", arrel_lloc_ueb);
+        }
+    }
+
+    return port;
+}
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer. Les seves declaracions es        */
@@ -294,4 +318,45 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
     memcpy(info1, info1Loc, sizeof(info1Loc));
 
     return 0;
+}
+
+/* Obre i llegeix el fitxer demanat pel client/usuari.                    */
+/*                                                                        */
+/* Paràmetre SckCon és el socket, nomFitxer és el nom del fitxer,         */
+/* i TextRes és on s'imprimirà el text resultant de l'execució.           */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  0 si el fitxer existeix,                                              */
+/*  1 si el fitxer no existeix;                                           */
+/* -1 si hi ha un error a la interfície de sockets;                       */
+/* -2 si protocol és incorrecte (longitud camps, tipus de peticio);       */
+/* -3 si l'altra part tanca la connexió.                                  */
+int ReadiEnvFit(int SckCon, char *nomFitxer, char *TextRes)
+{
+    int codiRes;
+    char info[10000], linia[10000];
+    FILE* fd = fopen(nomFitxer, "r");
+
+    if (fd == NULL) { // si fitxer no existeix -> error 1
+        /* Construim el missatge i l'enviem */
+        char* message = "Fitxer no trobat";
+        if ((codiRes = ConstiEnvMis(SckCon, "ERR\0", message, strlen(message))) < 0) {
+            sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
+            return codiRes;
+        }
+        return 1;
+    } else { // el fitxer existeix
+        /* llegim el fitxer */
+        int pos = 0;
+        while (fgets(linia, sizeof(linia), fd) != NULL) {
+            memcpy(info + pos, linia, strlen(linia));
+            pos += strlen(linia);
+        }
+        /* Construim el missatge amb el fitxer i l'enviem */
+        if ((codiRes = ConstiEnvMis(SckCon, "COR\0", info, strlen(info))) < 0) {
+            sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
+            return codiRes;
+        }
+        return 0;
+    }
 }

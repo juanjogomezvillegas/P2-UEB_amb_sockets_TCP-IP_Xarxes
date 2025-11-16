@@ -25,8 +25,8 @@
 /* Definició de constants, p.e.,                                          */
 
 #define FILE_PORT_TIPIC "p2-serUEB.cfg"
+#define PORT_TIPIC 8000
 int SckCon;                             // socket de connexió global per gestionar el tancament en cas de senyal
-int PORT_TIPIC;                         // port UEB típic
 
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
@@ -34,13 +34,10 @@ int PORT_TIPIC;                         // port UEB típic
 void aturadaC(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
-int readPortTipic(char* file_cfg);
 
 int main(int argc,char *argv[]) {
     /* Senyals.                                                           */
     signal(SIGINT, aturadaC);
-
-    PORT_TIPIC = readPortTipic(FILE_PORT_TIPIC);
 
     /* Declaració de variables                                            */
     struct timeval time_ini_resposta, time_fi_resposta, time_ini_envia, time_fi_envia;
@@ -173,7 +170,11 @@ int main(int argc,char *argv[]) {
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer. Les seves declaracions es troben */
 /* a l'inici d'aquest fitxer.                                             */
-    
+
+/* Tanca els sockets oberts abans d'aturar l'execució del C suaument.     */
+/*                                                                        */
+/* Retorna:                                                               */
+/*   0 sempre                                                             */
 void aturadaC(int signal) {
     printf("\nS'ha detectat el senyal Control+c. Espera un moment...\n"); // informa a l'usuari per pantalla
     if(SckCon>0){
@@ -206,37 +207,4 @@ void Tanca(int Sck) {
     if (UEBc_TancaConnexio(Sck, TextRes) == -1) {
         exit(exitError(TextRes));
     }
-}
-
-/* Llegeix el port tipic UEB del fitxer entrat per paramètre              */
-/* i el retorna.                                                          */
-/*                                                                        */
-/* Paràmetre file_cfg, correspon a un string que conté el nom del fitxer  */
-/* p2-serUEB.cfg, o un altre nom amb extensió .cfg                        */
-/*                                                                        */
-/* Retorna:                                                               */
-/*  el port tipic llegit si tot va bé;                                    */
-/* -1 si hi ha error.                                                     */
-int readPortTipic(char* file_cfg) {
-    // declaració de variables
-    FILE *file;
-    char line[256];
-    int port = -1;
-
-    // obre el fitxer cfg
-    file = fopen(file_cfg, "r");
-    if (file == NULL) { // retorna -1 si hi ha error
-        perror("Error en obrir el fitxer!");
-        return -1;
-    }
-    
-    // si tot va bé, cerca la línia "numportTCP P", i finalment només retornarà "P"
-    bool fi = false;
-    while (fgets(line, sizeof(line), file) && !fi) {
-        if (strncmp(line, "numportTCP", 10) == 0) {
-            sscanf(line+11, "%d", &port);
-        }
-    }
-
-    return port;
 }
