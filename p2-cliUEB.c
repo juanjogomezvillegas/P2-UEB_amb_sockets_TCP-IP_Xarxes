@@ -109,9 +109,6 @@ int main(int argc,char *argv[]) {
                 exit(exitError(&textRes));
             }
 
-            // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-            printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
-
             gettimeofday(&time_ini_envia, NULL);
 
             /* Crida a la funció per sol·licitar el fitxer i rebre'l                                */
@@ -120,6 +117,9 @@ int main(int argc,char *argv[]) {
                 Tanca(SckCon);
                 exit(exitError(&textRes));
             }
+
+            // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+            printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
 
             printf("\n%s\n", Fitxer);
 
