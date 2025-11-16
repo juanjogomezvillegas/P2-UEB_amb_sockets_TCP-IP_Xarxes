@@ -103,16 +103,16 @@ int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, 
         return codiRes;
     }
 
-    if (strcmp(tipus, "COR\0") == 0) {
+    if (strcmp(tipus, "COR\0") == 0) { // si es rep un missatge COR amb el fitxer
         memcpy(Fitx, info, long1);
         *LongFitx = long1;
-        sprintf(TextRes, "Fitxer rebut correctament (%d bytes)", long1);
+        sprintf(TextRes, "Fitxer rebut correctament (%d bytes rebuts)", long1);
         return 0;
-    } else if (strcmp(tipus, "ERR\0") == 0) {
+    } else if (strcmp(tipus, "ERR\0") == 0) { // si es rep un missatge ERR 404
         sprintf(TextRes, "Error del servidor: %.*s", long1, info);
         return 1;
-    } else {
-        sprintf(TextRes, "Tipus desconegut: %s", tipus);
+    } else { // altrament per altres opcions, el missatge és desconegut i per tant podria ser que el protocol fos incorrecte
+        sprintf(TextRes, "Tipus de missatge %s desconegut", tipus);
         return -2;
     }
 }
@@ -258,7 +258,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 
     memcpy(tipus, tipusLoc, 4);
     *long1 = atoi(long1Loc);
-    memcpy(info1, info1Loc, bytesLlegits-7);
+    memcpy(info1, info1Loc, sizeof(info1Loc));
 
     return 0;
 }

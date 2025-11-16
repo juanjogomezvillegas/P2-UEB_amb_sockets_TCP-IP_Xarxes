@@ -44,6 +44,7 @@ int main(int argc,char *argv[]) {
 
     /* Declaració de variables                                            */
     struct timeval time_ini_resposta, time_fi_resposta, time_ini_envia, time_fi_envia;
+    int retornPeticio;
     int option;
     char textRes;
     char ipSer[16], vellaIpSer[16];
@@ -104,7 +105,6 @@ int main(int argc,char *argv[]) {
             } while (nomFitxer[0] != '/');
 
             if (UEBc_TrobaAdrSckConnexio(SckCon, IPloc, &portloc, IPrem, &portrem, &textRes) == -1) {
-                printf("Error en obtenir les adreçes del socket de connexio: %s\n", &textRes);
                 Tanca(SckCon);
                 exit(exitError(&textRes));
             }
@@ -112,18 +112,20 @@ int main(int argc,char *argv[]) {
             gettimeofday(&time_ini_envia, NULL);
 
             /* Crida a la funció per sol·licitar el fitxer i rebre'l                                */
-            if (UEBc_ObteFitxer(SckCon, nomFitxer, Fitxer, &longFitxer, &textRes) == -1) {
-                printf("Error en obtenir el fitxer: %s\n", &textRes);
+            if ((retornPeticio = UEBc_ObteFitxer(SckCon, nomFitxer, Fitxer, &longFitxer, &textRes)) == -1) {
                 Tanca(SckCon);
                 exit(exitError(&textRes));
             }
 
-            // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-            printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
+            if (retornPeticio == 0) { // si retorn és 0, es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
 
-            printf("\n%s\n", Fitxer);
+                printf("\nInici fitxer:\n%s\nFi fitxer\n", Fitxer);
 
-            printf("\nFitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
+                printf("\nFitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
+            } else if (retornPeticio == 1) { // si retorn és 1, es mostra: error, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                printf("\nerror, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
+            }
 
             gettimeofday(&time_fi_envia, NULL);
 

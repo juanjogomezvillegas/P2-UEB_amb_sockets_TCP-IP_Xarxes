@@ -291,7 +291,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 
     memcpy(tipus, tipusLoc, 4);
     *long1 = atoi(long1Loc);
-    memcpy(info1, info1Loc, bytesLlegits-7);
+    memcpy(info1, info1Loc, sizeof(info1Loc));
 
     return 0;
 }
