@@ -34,6 +34,7 @@ int SckCon;                             // socket de connexió global per gestio
 void aturadaC(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
+int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer, char* textRes);
 
 int main(int argc,char *argv[]) {
     /* Senyals.                                                           */
@@ -64,7 +65,7 @@ int main(int argc,char *argv[]) {
 
         if (option == 1) { // l'usuari vol obtenir un fitxer
 
-            gettimeofday(&time_ini_resposta, NULL);
+            gettimeofday(&time_ini_resposta, NULL); // inici temps resposta
 
             /* El C crea el seu socket en un #port TCP qualsevol i, demana al S la connexió TCP */
             connexioIgual = false;
@@ -106,7 +107,7 @@ int main(int argc,char *argv[]) {
                 exit(exitError(&textRes));
             }
 
-            gettimeofday(&time_ini_envia, NULL);
+            gettimeofday(&time_ini_envia, NULL); // inici temps enviament
 
             /* Crida a la funció per sol·licitar el fitxer i rebre'l                                */
             if ((retornPeticio = UEBc_ObteFitxer(SckCon, nomFitxer, Fitxer, &longFitxer, &textRes)) == -1) {
@@ -114,45 +115,36 @@ int main(int argc,char *argv[]) {
                 exit(exitError(&textRes));
             }
 
-            if (retornPeticio == 0) { // si retorn és 0, es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-                printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
+            gettimeofday(&time_fi_envia, NULL); // fi temps enviament
 
-                printf("\nInici fitxer:\n%s\nFi fitxer\n", Fitxer);
-
-                printf("\nFitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
-            } else if (retornPeticio == 1) { // si retorn és 1, es mostra: error, nom_fitxer, @socket (@IP:#portTCP) de C i S
-                printf("\nerror, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
-            }
-
-            gettimeofday(&time_fi_envia, NULL);
-
-            gettimeofday(&time_fi_resposta, NULL);
+            gettimeofday(&time_fi_resposta, NULL); // fi temps resposta
 
             double temps_envia = (time_fi_envia.tv_sec - time_ini_envia.tv_sec) + (time_fi_envia.tv_usec - time_ini_envia.tv_usec) / 1000000.0;
             double temps_resposta = (time_fi_resposta.tv_sec - time_ini_resposta.tv_sec) + (time_fi_resposta.tv_usec - time_ini_resposta.tv_usec) / 1000000.0;
 
+            // mostra el retorn/resultat de la petició UEB
+            if (retornPeticio == 0) { // si retorn és 0, es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
+
+                printf("\nInici fitxer:\n");
+                write(1, Fitxer, longFitxer);
+                printf("\nFi fitxer\n");
+
+                printf("\nFitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
+
+                // finalment desem el fitxer de sortida en local
+                if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer, &textRes) == -1) {
+                    Tanca(SckCon);
+                    exit(exitError(&textRes));
+                }
+            } else if (retornPeticio == 1) { // si retorn és 1, es mostra: error, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                printf("\nerror, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
+            }
+
+            // mostra els temps de resposta, enviament i la velocitat efectiva
             printf("\nTemps d'enviament: %.6f segons\n", temps_envia);
             printf("Temps de resposta: %.6f segons\n", temps_resposta);
             printf("Velocitat efectiva: %.6f bits/segon\n", ((longFitxer*8)/temps_envia));
-
-            /*char nomLocal[128];
-            sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
-            FILE *f = fopen(nomLocal, "wb");
-            if (f == NULL) {
-                perror("No s'ha pogut crear el fitxer local");
-                Tanca(SckCon);
-                exit(exitError(textRes));
-            }
-
-            // Escriure el contingut rebut al fitxer local
-            fwrite(Fitxer, 1, longFitxer, f);
-            fclose(f);
-            printf("Fitxer desat com a %s\n", nomLocal);
-
-            // Obrir el fitxer rebut amb el navegador per defecte del sistema
-            char cmd[200];
-            sprintf(cmd, "xdg-open %s", nomLocal);
-            system(cmd);*/
         } else if (option == 0) { // l'usuari vol sortir
             sortir = true;
         }
@@ -207,4 +199,27 @@ void Tanca(int Sck) {
     if (UEBc_TancaConnexio(Sck, TextRes) == -1) {
         exit(exitError(TextRes));
     }
+}
+
+/* Donat el contingut d'un fitxer (Fitxer) i la seva longitud (longFitxer),    */
+/* crea un fitxer amb el contingut Fitxer que tindrà el nom nomFitxer.         */
+/*                                                                             */
+/* Retorna:                                                                    */
+/*   0 si tot va bé                                                            */
+/*  -1 si hi ha algun error                                                    */
+int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer, char* textRes) {
+    char nomLocal[128];
+    sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
+    FILE *f = fopen(nomLocal, "wb");
+    if (f == NULL) {
+        perror("No s'ha pogut crear el fitxer local");
+        return -1;
+    }
+
+    // Escriure el contingut rebut al fitxer local
+    fwrite(Fitxer, 1, longFitxer, f);
+    fclose(f);
+    printf("Fitxer desat com a %s\n", nomLocal);
+
+    return 0;
 }
