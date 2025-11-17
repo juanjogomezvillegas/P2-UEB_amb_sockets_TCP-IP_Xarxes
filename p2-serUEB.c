@@ -43,7 +43,7 @@ int main(int argc,char *argv[]) {
 
     /* Declaració de variables                                            */
     int port_tipic;
-    char arrel_lloc_ueb;
+    char arrel_lloc_ueb[10000];
     char textRes;
     char iprem[16], iploc[16];
     int portrem, portloc;
@@ -54,7 +54,7 @@ int main(int argc,char *argv[]) {
     /* Situació pre-inicial                                               */
 
     // llegeix el port típic i l'arrel del lloc UEB
-    if ((port_tipic = ReadConf(FILE_CONFIG, &arrel_lloc_ueb, &textRes)) == -1) {
+    if ((port_tipic = ReadConf(FILE_CONFIG, arrel_lloc_ueb, &textRes)) == -1) {
         port_tipic = 8000;
     }
 
@@ -83,7 +83,7 @@ int main(int argc,char *argv[]) {
         retornPeticio = 0;
         while (retornPeticio != -3 && retornPeticio != -2) {
             // rep i serveix la petició
-            if ((retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, &textRes)) == -1) {
+            if ((retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, arrel_lloc_ueb, &textRes)) == -1) {
                 Tanca(sesc);
                 Tanca(scon);
                 exit(exitError(&textRes));

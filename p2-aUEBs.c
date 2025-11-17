@@ -28,7 +28,6 @@
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
 
-int ReadPortAndArrel(char* file_cfg, char* arrel_lloc_ueb, char *TextRes);
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1);
 int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
 int ReadiEnvFit(int SckCon, char *nomFitxer, char *TextRes);
@@ -103,7 +102,7 @@ int UEBs_AcceptaConnexio(int SckEsc, char *TextRes)
 /* -3 si l'altra part tanca la connexió;                                  */
 /* -4 si hi ha problemes amb el fitxer de la petició (p.e., nomfitxer no  */
 /*  comença per /, fitxer no es pot llegir, fitxer massa gran, etc.).     */
-int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *TextRes)
+int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *arrelLlocUeb, char *TextRes)
 {
     /* Declarem les variables necessaries */
 	int codiRes;
@@ -123,11 +122,8 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Tex
     }
 
     // concatena l'arrel del lloc UEB al fitxer abans d'obrir-lo
-    char arrel[10000];
-    int port = ReadPortAndArrel("p2-serUEB.cfg", arrel, TextRes);
-
-    memcpy(nomfitxer, arrel, strlen(arrel));
-    memcpy(nomfitxer + strlen(arrel), NomFitx, strlen(NomFitx));
+    memcpy(nomfitxer, arrelLlocUeb, strlen(arrelLlocUeb));
+    memcpy(nomfitxer + strlen(arrelLlocUeb), NomFitx, strlen(NomFitx));
 
     // codi per l'anterior versió on l'arrel era la carpeta que s'executa
     //memcpy(nomfitxer, NomFitx, strlen(NomFitx));
@@ -190,43 +186,6 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
     }
 
     return 0;
-}
-
-/* Llegeix el port tipic UEB del fitxer entrat per paramètre              */
-/* i el retorna.                                                          */
-/*                                                                        */
-/* Paràmetre file_cfg, correspon a un string que conté el nom del fitxer  */
-/* p2-serUEB.cfg, o un altre nom amb extensió .cfg                        */
-/* Paràmetre arrel_lloc_ueb, correspon a l'arrel del lloc ueb             */
-/*                                                                        */
-/* Retorna:                                                               */
-/*  el port tipic llegit si tot va bé;                                    */
-/* -1 si hi ha error.                                                     */
-int ReadPortAndArrel(char* file_cfg, char* arrel_lloc_ueb, char *TextRes)
-{
-    // declaració de variables
-    FILE *file;
-    char line[256];
-    int port = -1;
-
-    // obre el fitxer cfg
-    file = fopen(file_cfg, "r");
-    if (file == NULL) { // retorna -1 si hi ha error
-        sprintf(TextRes, "Error en obrir el fitxer!");
-        return -1;
-    }
-    
-    // si tot va bé, cerca la línia "numportTCP P", i finalment només retornarà "P"
-    bool fi = false;
-    while (fgets(line, sizeof(line), file) && !fi) {
-        if (strncmp(line, "numportTCP", 10) == 0) {
-            sscanf(line+11, "%d", &port);
-        } else if (strncmp(line, "Arrel", 5) == 0) {
-            sscanf(line+6, "%s", arrel_lloc_ueb);
-        }
-    }
-
-    return port;
 }
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
