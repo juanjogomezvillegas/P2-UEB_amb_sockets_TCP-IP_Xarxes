@@ -127,13 +127,13 @@ int main(int argc,char *argv[]) {
                 printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
 
                 printf("\nInici fitxer:\n");
-                write(1, Fitxer, longFitxer);
+                write(1, Fitxer, longFitxer); // error en visualitzar
                 printf("\nFi fitxer\n");
 
-                printf("\nFitxer rebut correctament. Longitud: %d bytes\n", longFitxer);
+                printf("\n%s\n", textRes);
 
                 // finalment desem el fitxer de sortida en local
-                if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer, &textRes) == -1) {
+                if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer, &textRes) == -1) { // error en escriure
                     Tanca(SckCon);
                     exit(exitError(&textRes));
                 }
