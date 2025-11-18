@@ -119,7 +119,7 @@ int main(int argc,char *argv[]) {
     /* Situació final                                                     */
 
     // Tancar el socket d'escolta
-    if(UEBc_TancaConnexio(sesc, &textRes) == -1) {
+    if(UEBs_TancaConnexio(sesc, &textRes) == -1) {
         printf("Error en tancar la connexió: %s", &textRes);
         exit(exitError(&textRes));
     }

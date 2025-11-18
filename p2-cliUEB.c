@@ -57,6 +57,8 @@ int main(int argc,char *argv[]) {
     bool sortir, connexioIgual = false;
     while (!sortir) {
         /* actualitzem ip i port anteriors (incialment són buits i ports és el típic)          */
+        memset(nomFitxer, 0, sizeof(nomFitxer));
+        //memset(textRes, 0, sizeof(textRes));
         memcpy(vellaIpSer, ipSer, sizeof(ipSer));
         vellPortSer = portSer;
 
@@ -82,7 +84,8 @@ int main(int argc,char *argv[]) {
                 }
                 if (SckCon > 0 && memcmp(ipSer, vellaIpSer, sizeof(ipSer)) == 0 && portSer == vellPortSer) {
                     connexioIgual = true;
-                } else {
+                } 
+                else {
                     if (SckCon > 0) {
                         Tanca(SckCon);
                     }
@@ -134,10 +137,10 @@ int main(int argc,char *argv[]) {
                 printf("\n%s\n", &textRes);
 
                 // finalment desem el fitxer de sortida en local
-                /*if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer) == -1) { // error en escriure
+                if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer) == -1) { // error en escriure
                     Tanca(SckCon);
                     exit(exitError(&textRes));
-                }*/
+                }
             } else if (retornPeticio == 1) { // si retorn és 1, es mostra: error, nom_fitxer, @socket (@IP:#portTCP) de C i S
                 printf("\nerror, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
             }
@@ -146,9 +149,6 @@ int main(int argc,char *argv[]) {
             printf("\nTemps d'enviament: %.6f segons\n", temps_envia);
             printf("Temps de resposta: %.6f segons\n", temps_resposta);
             printf("Velocitat efectiva: %.6f bits/segon\n", ((longFitxer*8)/temps_envia));
-
-            // alliberem memoria pensant en la segona petició
-            nomFitxer[0] = '\0';
         } else if (option == 0) { // l'usuari vol sortir
             sortir = true;
         }
