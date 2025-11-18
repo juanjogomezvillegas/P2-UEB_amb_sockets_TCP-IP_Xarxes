@@ -44,7 +44,7 @@ int main(int argc,char *argv[]) {
     struct timeval time_ini_resposta, time_fi_resposta, time_ini_envia, time_fi_envia;
     int retornPeticio;
     int option;
-    char textRes[256] = {0};
+    char *textRes;
     char ipSer[16] = {0}, vellaIpSer[16] = {0};
     int portSer = 0, vellPortSer = PORT_TIPIC;
     char IPloc[16], IPrem[16];
@@ -132,7 +132,7 @@ int main(int argc,char *argv[]) {
                 write(1, Fitxer, longFitxer); // error en visualitzar
                 printf("\nFi fitxer\n");
 
-                printf("\n%s\n", textRes);
+                printf("\n%s\n", &textRes);
 
                 // finalment desem el fitxer de sortida en local
                 if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer, &textRes) == -1) { // error en escriure
