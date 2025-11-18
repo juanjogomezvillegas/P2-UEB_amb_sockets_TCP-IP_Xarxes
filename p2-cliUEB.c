@@ -42,24 +42,23 @@ int main(int argc,char *argv[]) {
 
     /* Declaració de variables                                            */
     struct timeval time_ini_resposta, time_fi_resposta, time_ini_envia, time_fi_envia;
-    int retornPeticio;
     int option;
     char textRes;
     char ipSer[16], vellaIpSer[16];
     int portSer, vellPortSer = PORT_TIPIC;
-    char IPloc[16], IPrem[16];
-    int portloc, portrem;
-    // variables per obtenir el fitxer
-    char nomFitxer[100];
-    char Fitxer[10000];   // buffer per rebre el fitxer
-    int longFitxer;
 
     SckCon = -1;
     bool sortir, connexioIgual = false;
     while (!sortir) {
+        // variables per obtenir el fitxer
+        char nomFitxer[100];
+        char Fitxer[10000];   // buffer per rebre el fitxer
+        int longFitxer;
+        char IPloc[16], IPrem[16];
+        int portloc, portrem;
+        int retornPeticio;
+
         /* actualitzem ip i port anteriors (incialment són buits i ports és el típic)          */
-        memset(nomFitxer, 0, sizeof(nomFitxer));
-        //memset(textRes, 0, sizeof(textRes));
         memcpy(vellaIpSer, ipSer, sizeof(ipSer));
         vellPortSer = portSer;
 
@@ -135,6 +134,8 @@ int main(int argc,char *argv[]) {
                 printf("%s", Fitxer);
                 printf("\nFi fitxer\n");
 
+                printf("\n%s\n", &textRes);
+
                 // finalment desem el fitxer de sortida en local
                 if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer) == -1) { // error en escriure
                     Tanca(SckCon);
@@ -151,6 +152,8 @@ int main(int argc,char *argv[]) {
         } else if (option == 0) { // l'usuari vol sortir
             sortir = true;
         }
+
+        memset(nomFitxer, 0, sizeof(nomFitxer));
     }
 
     // Tancar la connexió

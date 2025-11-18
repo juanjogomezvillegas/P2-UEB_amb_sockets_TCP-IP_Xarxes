@@ -45,11 +45,6 @@ int main(int argc,char *argv[]) {
     int port_tipic;
     char arrel_lloc_ueb[10000];
     char textRes;
-    char iprem[16], iploc[16];
-    int portrem, portloc;
-    int retornPeticio;
-    char tipus[4];
-    char nomFitxer[10000];
 
     /* Situació pre-inicial                                               */
 
@@ -67,6 +62,12 @@ int main(int argc,char *argv[]) {
     /* Situació inicial                                                   */
 
     for (;;) {
+        char nomFitxer[10000];
+        char iprem[16], iploc[16];
+        int portrem, portloc;
+        int retornPeticio;
+        char tipus[4];
+
         printf("\n...Esperant peticions, clients veniu amb mi...\n");
 
         // Espera a rebre connexions, i quan li arriba una l'accepta
@@ -111,6 +112,7 @@ int main(int argc,char *argv[]) {
                     }
                 } else { // si el C és desconnecta o tanca la connexió
                     printf("\nC desconnectat\n");
+                    memset(nomFitxer, 0, sizeof(nomFitxer));
                 }
             }
         }
