@@ -271,10 +271,10 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
     if (strlen(tipusLoc) != 3 || atoi(long1Loc) <= 0 || atoi(long1Loc) > 9999) {
         return -2;
     }
-
+    
     memcpy(tipus, tipusLoc, 4);
     *long1 = atoi(long1Loc);
-    memcpy(info1, info1Loc, sizeof(info1Loc));
+    memcpy(info1, info1Loc, *long1);
 
     return 0;
 }
