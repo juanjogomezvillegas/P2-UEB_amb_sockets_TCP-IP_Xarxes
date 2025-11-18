@@ -67,18 +67,25 @@ int main(int argc,char *argv[]) {
     /* Situació inicial                                                   */
 
     for (;;) {
+        printf("\n...Esperant peticions, clients veniu amb mi...\n");
+
+        // Espera a rebre connexions, i quan li arriba una l'accepta
         if ((scon = UEBs_AcceptaConnexio(sesc, &textRes)) == -1) {
             Tanca(sesc);
             exit(exitError(&textRes));
         }
 
+        // troba les adreces locals i remotes del socket de connexió
         if (UEBs_TrobaAdrSckConnexio(scon, iploc, &portloc, iprem, &portrem, &textRes) == -1) {
             Tanca(sesc);
             Tanca(scon);
             exit(exitError(&textRes));
         }
 
+        // mostra les adreces
         printf("\nSocket local @IP=%s;#port=%d.\nS'ha connectat un C amb @IP=%s;#port=%d.\n", iploc, portloc, iprem, portrem);
+
+        /* Comença a servir la petició                                      */
 
         retornPeticio = 0;
         while (retornPeticio != -3 && retornPeticio != -2) {
@@ -89,20 +96,20 @@ int main(int argc,char *argv[]) {
                 exit(exitError(&textRes));
             }
 
-            if (retornPeticio == -2) {
-                printf("\n%s\n", &textRes);
-            } else {
-                if (retornPeticio != -3) {
-                    if (retornPeticio == 0) {
+            if (retornPeticio == -2) { // si la petició tenia un fitxer massa gran o un tipus de missatge incorrecte
+                printf("\nError fitxer massa gran o tipus de missatge incorrecte. %s\n", &textRes);
+            } else { // altrament
+                if (retornPeticio != -3) { // si el C encara no s'ha des connectat
+                    if (retornPeticio == 0) { // si el fitxer existeix al S
                         // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
                         printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
-                    } else if (retornPeticio == 1) {
+                    } else if (retornPeticio == 1) { // si el fitxer no exiteix al S
                         // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
                         printf("\nerror, fitxer %s no trobat, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
-                    } else {
+                    } else { // altres errors
                         printf("\n%s\n", &textRes);
                     }
-                } else {
+                } else { // si el C és desconnecta o tanca la connexió
                     printf("\nC desconnectat\n");
                 }
             }
@@ -111,7 +118,11 @@ int main(int argc,char *argv[]) {
 
     /* Situació final                                                     */
 
-    Tanca(sesc);
+    // Tancar el socket d'escolta
+    if(UEBc_TancaConnexio(sesc, &textRes) == -1) {
+        printf("Error en tancar la connexió: %s", &textRes);
+        exit(exitError(&textRes));
+    }
 
     exit(0);
 }
