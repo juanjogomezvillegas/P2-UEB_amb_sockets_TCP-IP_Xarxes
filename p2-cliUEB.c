@@ -24,7 +24,6 @@
 
 /* Definició de constants, p.e.,                                          */
 
-#define FILE_PORT_TIPIC "p2-serUEB.cfg"
 #define PORT_TIPIC 8000
 int SckCon;                             // socket de connexió global per gestionar el tancament en cas de senyal
 
@@ -54,15 +53,16 @@ int main(int argc,char *argv[]) {
     char Fitxer[10000];   // buffer per rebre el fitxer
     int longFitxer;
 
+    SckCon = -1;
     bool sortir, connexioIgual = false;
-    while (sortir == false) {
+    while (!sortir) {
+        /* actualitzem ip i port anteriors (incialment són buits i ports és el típic)          */
         memset(nomFitxer, 0, sizeof(nomFitxer));
-        textRes = "";
-
+        //memset(textRes, 0, sizeof(textRes));
         memcpy(vellaIpSer, ipSer, sizeof(ipSer));
         vellPortSer = portSer;
 
-        /* Situació inicial                                                   */
+        /* Situació inicial                                                                    */
         printf("Què vols fer [obtenir -> 1|sortir -> 0]? ");
         scanf("%d", &option);
 
@@ -131,19 +131,15 @@ int main(int argc,char *argv[]) {
                 printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
 
                 printf("\nInici fitxer:\n");
-                write(1, Fitxer, longFitxer); // error en visualitzar
+                printf("%s", Fitxer);
                 printf("\nFi fitxer\n");
-
-                printf("\n%s\n", &textRes);
-                printf("\n%s\n", &textRes);
 
                 // finalment desem el fitxer de sortida en local
                 if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer) == -1) { // error en escriure
                     Tanca(SckCon);
                     exit(exitError(&textRes));
                 }
-            } 
-            else if (retornPeticio == 1) { // si retorn és 1, es mostra: error, nom_fitxer, @socket (@IP:#portTCP) de C i S
+            } else if (retornPeticio == 1) { // si retorn és 1, es mostra: error, nom_fitxer, @socket (@IP:#portTCP) de C i S
                 printf("\nerror, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
             }
 
@@ -151,8 +147,7 @@ int main(int argc,char *argv[]) {
             printf("\nTemps d'enviament: %.6f segons\n", temps_envia);
             printf("Temps de resposta: %.6f segons\n", temps_resposta);
             printf("Velocitat efectiva: %.6f bits/segon\n", ((longFitxer*8)/temps_envia));
-        } 
-        else if (option == 0) { // l'usuari vol sortir
+        } else if (option == 0) { // l'usuari vol sortir
             sortir = true;
         }
     }
@@ -176,11 +171,15 @@ int main(int argc,char *argv[]) {
 /*   0 sempre                                                             */
 void aturadaC(int signal) {
     printf("\nS'ha detectat el senyal Control+c. Espera un moment...\n"); // informa a l'usuari per pantalla
-    if(SckCon>0){
+
+    if(SckCon > 0) {
         Tanca(SckCon);
+
         printf("socket de connexió tancat correctament...\n"); // informa a l'usuari per pantalla
     }
+
     printf("\nFI del programa.\n"); // informa a l'usuari per pantalla de què s'ha aturat l'execució del C
+
     exit(0);
 }
 
