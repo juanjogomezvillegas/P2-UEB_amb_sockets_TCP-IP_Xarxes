@@ -56,7 +56,8 @@ int main(int argc,char *argv[]) {
 
     bool sortir, connexioIgual = false;
     while (sortir == false) {
-        
+        memset(nomFitxer, 0, sizeof(nomFitxer));
+        textRes = "";
 
         memcpy(vellaIpSer, ipSer, sizeof(ipSer));
         vellPortSer = portSer;
@@ -83,7 +84,8 @@ int main(int argc,char *argv[]) {
                 }
                 if (SckCon > 0 && memcmp(ipSer, vellaIpSer, sizeof(ipSer)) == 0 && portSer == vellPortSer) {
                     connexioIgual = true;
-                } else {
+                } 
+                else {
                     if (SckCon > 0) {
                         Tanca(SckCon);
                     }
@@ -139,7 +141,8 @@ int main(int argc,char *argv[]) {
                     Tanca(SckCon);
                     exit(exitError(&textRes));
                 }
-            } else if (retornPeticio == 1) { // si retorn és 1, es mostra: error, nom_fitxer, @socket (@IP:#portTCP) de C i S
+            } 
+            else if (retornPeticio == 1) { // si retorn és 1, es mostra: error, nom_fitxer, @socket (@IP:#portTCP) de C i S
                 printf("\nerror, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, IPloc, portloc, IPrem, portrem);
             }
 
