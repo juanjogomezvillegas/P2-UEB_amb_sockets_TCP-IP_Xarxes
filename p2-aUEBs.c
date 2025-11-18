@@ -295,34 +295,28 @@ int ReadiEnvFit(int SckCon, char *nomFitxer, char *TextRes)
 {
     int codiRes;
     char info[10000], linia[10000];
+    FILE* fd = fopen(nomFitxer, "r");
 
-    int fd = open(nomFitxer, O_RDONLY);
-    
-    if (fd == -1) { // si fitxer no existeix -> error 1
+    if (fd == NULL) { // si fitxer no existeix -> error 1
         /* Construim el missatge i l'enviem */
         char* message = "Fitxer no trobat";
         if ((codiRes = ConstiEnvMis(SckCon, "ERR\0", message, strlen(message))) < 0) {
             sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
             return codiRes;
         }
-        close(fd);
         return 1;
     } else { // el fitxer existeix
         /* llegim el fitxer */
         int pos = 0;
-        int bytes_llegits;
-        while ((bytes_llegits = read(fd, linia, sizeof(linia))) > 0) {
-            if (pos + bytes_llegits < sizeof(info)) {
-                memcpy(info + pos, linia, bytes_llegits);
-                pos += bytes_llegits;
-            }
+        while (fgets(linia, sizeof(linia), fd) != NULL) {
+            memcpy(info + pos, linia, strlen(linia));
+            pos += strlen(linia);
         }
         /* Construim el missatge amb el fitxer i l'enviem */
         if ((codiRes = ConstiEnvMis(SckCon, "COR\0", info, strlen(info))) < 0) {
             sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
             return codiRes;
         }
-        close(fd);
         return 0;
     }
 }
