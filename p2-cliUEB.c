@@ -224,8 +224,8 @@ int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer) {
     }
 
     // Escriure el contingut rebut al fitxer local
-    fwrite(Fitxer, 1, longFitxer, f);
-    fclose(f);
+    write(Fitxer, 1, longFitxer, f);
+    close(f);
     printf("Fitxer desat com a %s\n", nomLocal);
 
     return 0;
