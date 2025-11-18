@@ -34,7 +34,7 @@ int SckCon;                             // socket de connexió global per gestio
 void aturadaC(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
-int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer, char* textRes);
+int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer);
 
 int main(int argc,char *argv[]) {
     /* Senyals.                                                           */
@@ -130,10 +130,12 @@ int main(int argc,char *argv[]) {
                 write(1, Fitxer, longFitxer); // error en visualitzar
                 printf("\nFi fitxer\n");
 
-                printf("\n%s\n", textRes);
+                printf("\n");
+                write(1, textRes, sizeof(textRes));
+                printf("\n");
 
                 // finalment desem el fitxer de sortida en local
-                if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer, &textRes) == -1) { // error en escriure
+                if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer) == -1) { // error en escriure
                     Tanca(SckCon);
                     exit(exitError(&textRes));
                 }
@@ -207,7 +209,7 @@ void Tanca(int Sck) {
 /* Retorna:                                                                    */
 /*   0 si tot va bé                                                            */
 /*  -1 si hi ha algun error                                                    */
-int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer, char* textRes) {
+int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer) {
     char nomLocal[128];
     sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
     FILE *f = fopen(nomLocal, "wb");

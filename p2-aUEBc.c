@@ -104,9 +104,9 @@ int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, 
     }
 
     if (strcmp(tipus, "COR\0") == 0) { // si es rep un missatge COR amb el fitxer
-        memcpy(Fitx, info, long1);
-        *LongFitx = long1;
         sprintf(TextRes, "Fitxer rebut correctament (%d bytes rebuts)", long1);
+        sprintf(Fitx, "%s", info);
+        *LongFitx = long1;
         return 0;
     } else if (strcmp(tipus, "ERR\0") == 0) { // si es rep un missatge ERR 404
         sprintf(TextRes, "Error del servidor: %.*s", long1, info);
