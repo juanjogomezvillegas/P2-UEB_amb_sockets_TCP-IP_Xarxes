@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <fcntl.h>
 #include <sys/time.h>
 
 /* Definició de constants, p.e.,                                          */
@@ -216,14 +217,14 @@ void Tanca(int Sck) {
 int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer) {
     char nomLocal[128];
     sprintf(nomLocal, ".%s", nomFitxer); // guarda amb el mateix nom (sense '/')
-    FILE *f = fopen(nomLocal, "wb");
-    if (f == NULL) {
+    int f = open(nomLocal,  O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (f == -1) {
         perror("No s'ha pogut crear el fitxer local");
         return -1;
     }
 
     // Escriure el contingut rebut al fitxer local
-    write(Fitxer, 1, longFitxer, f);
+    write(f, Fitxer, longFitxer);
     close(f);
     printf("Fitxer desat com a %s\n", nomLocal);
 
