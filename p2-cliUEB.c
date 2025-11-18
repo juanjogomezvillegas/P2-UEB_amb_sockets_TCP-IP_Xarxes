@@ -44,9 +44,9 @@ int main(int argc,char *argv[]) {
     struct timeval time_ini_resposta, time_fi_resposta, time_ini_envia, time_fi_envia;
     int retornPeticio;
     int option;
-    char textRes;
-    char ipSer[16], vellaIpSer[16];
-    int portSer, vellPortSer = PORT_TIPIC;
+    char textRes[256] = {0};
+    char ipSer[16] = {0}, vellaIpSer[16] = {0};
+    int portSer = 0, vellPortSer = PORT_TIPIC;
     char IPloc[16], IPrem[16];
     int portloc, portrem;
     // variables per obtenir el fitxer
@@ -56,6 +56,8 @@ int main(int argc,char *argv[]) {
 
     bool sortir, connexioIgual = false;
     while (sortir == false) {
+        
+
         memcpy(vellaIpSer, ipSer, sizeof(ipSer));
         vellPortSer = portSer;
 
@@ -145,7 +147,8 @@ int main(int argc,char *argv[]) {
             printf("\nTemps d'enviament: %.6f segons\n", temps_envia);
             printf("Temps de resposta: %.6f segons\n", temps_resposta);
             printf("Velocitat efectiva: %.6f bits/segon\n", ((longFitxer*8)/temps_envia));
-        } else if (option == 0) { // l'usuari vol sortir
+        } 
+        else if (option == 0) { // l'usuari vol sortir
             sortir = true;
         }
     }
