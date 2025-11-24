@@ -140,7 +140,7 @@ int main(int argc,char *argv[]) {
                 printf("%s", Fitxer);
                 printf("\nFi fitxer\n");
 
-                printf("\n%s\n", &textRes);
+                printf("\nFitxer rebut correctament (%d bytes rebuts)\n", longFitxer);
 
                 // finalment desem el fitxer de sortida en local
                 if (CreateAndWriteOutFile(Fitxer, longFitxer, nomFitxer) == -1) { // error en escriure
