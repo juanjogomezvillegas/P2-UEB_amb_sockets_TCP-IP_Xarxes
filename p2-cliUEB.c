@@ -25,7 +25,10 @@
 
 /* Definició de constants, p.e.,                                          */
 
-#define PORT_TIPIC 8000
+#define FILE_CONFIG "p2-serUEB.cfg"
+
+/* Definició de constants, p.e.,                                          */
+
 int SckCon;                             // socket de connexió global per gestionar el tancament en cas de senyal
 
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
@@ -35,6 +38,7 @@ void aturadaC(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
 int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer);
+int ReadConf(char* file_cfg, char *TextRes);
 
 int main(int argc,char *argv[]) {
     /* Senyals.                                                           */
@@ -45,7 +49,9 @@ int main(int argc,char *argv[]) {
     int option;
     char textRes;
     char ipSer[16], vellaIpSer[16];
-    int portSer, vellPortSer = PORT_TIPIC;
+
+    int port_tipic = ReadConf(FILE_CONFIG, &textRes);
+    int portSer, vellPortSer = port_tipic;
 
     SckCon = -1;
     bool sortir, connexioIgual = false;
@@ -80,7 +86,7 @@ int main(int argc,char *argv[]) {
                 printf("Entra el #Port del servidor UEB [0 pel port típic]: \n");
                 scanf("%d", &portSer);
                 if (portSer == 0) { // si entra 0 assigna el port típic
-                    portSer = PORT_TIPIC;
+                    portSer = port_tipic;
                 }
                 if (SckCon > 0 && memcmp(ipSer, vellaIpSer, sizeof(ipSer)) == 0 && portSer == vellPortSer) {
                     connexioIgual = true;
@@ -232,4 +238,34 @@ int CreateAndWriteOutFile(char* Fitxer, int longFitxer, char* nomFitxer) {
     printf("Fitxer desat com a %s\n", nomLocal);
 
     return 0;
+}
+
+/* Llegeix el port tipic UEB del fitxer entrat per paramètre              */
+/* i el retorna.                                                          */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  el port tipic llegit si tot va bé;                                    */
+/* -1 si hi ha error.                                                     */
+int ReadConf(char* file_cfg, char *TextRes) {
+    // declaració de variables
+    FILE *file;
+    char line[256];
+    int port = -1;
+
+    // obre el fitxer cfg
+    file = fopen(file_cfg, "r");
+    if (file == NULL) { // retorna -1 si hi ha error
+        sprintf(TextRes, "Error en obrir el fitxer!");
+        return -1;
+    }
+    
+    // si tot va bé, cerca la línia "numportTCP P", i finalment només retornarà "P"
+    bool fi = false;
+    while (fgets(line, sizeof(line), file) && !fi) {
+        if (strncmp(line, "numportTCP", 10) == 0) {
+            sscanf(line+11, "%d", &port);
+        }
+    }
+
+    return port;
 }

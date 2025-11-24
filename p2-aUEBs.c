@@ -107,7 +107,6 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *arr
 {
     /* Declarem les variables necessaries */
 	int codiRes;
-    char info[10000], linia[10000];
     int long1;
     char nomfitxer[10000];
 
@@ -294,29 +293,45 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 int ReadiEnvFit(int SckCon, char *nomFitxer, char *TextRes)
 {
     int codiRes;
-    char info[10000], linia[10000];
-    FILE* fd = fopen(nomFitxer, "r");
+    FILE* fd = fopen(nomFitxer, "rb");
 
     if (fd == NULL) { // si fitxer no existeix -> error 1
         /* Construim el missatge i l'enviem */
-        char* message = "Fitxer no trobat";
+        char* message = "1 Fitxer no trobat";
         if ((codiRes = ConstiEnvMis(SckCon, "ERR\0", message, strlen(message))) < 0) {
             sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
             return codiRes;
         }
         return 1;
     } else { // el fitxer existeix
-        /* llegim el fitxer */
-        int pos = 0;
-        while (fgets(linia, sizeof(linia), fd) != NULL) {
-            memcpy(info + pos, linia, strlen(linia));
-            pos += strlen(linia);
+        fseek(fd, 0, SEEK_END); // ens movem al final del fitxer per obtenir la mida
+        long fileSize = ftell(fd);
+        fseek(fd, 0, SEEK_SET); // tornem a l'inici
+
+        char *info = malloc(fileSize); // Allocació dinàmica per a la memòria
+
+        if (info == NULL) { // Error d'allocació
+            sprintf(TextRes, "Error en allotjament de memòria");
+            fclose(fd);
+            return -1;
         }
+        
+        // llegim el fitxer per complet
+        size_t bytesRead = fread(info, 1, fileSize, fd);
+        fclose(fd);
+
+        if (bytesRead != fileSize) { // Comprovar si la lectura va ser exitosa
+            free(info);
+            sprintf(TextRes, "Error en llegir el fitxer");
+            return -1;
+        }
+
         /* Construim el missatge amb el fitxer i l'enviem */
-        if ((codiRes = ConstiEnvMis(SckCon, "COR\0", info, strlen(info))) < 0) {
+        if ((codiRes = ConstiEnvMis(SckCon, "COR\0", info, bytesRead)) < 0) {
             sprintf(TextRes, "Error en ConstiEnvMis ERR: %d", codiRes);
             return codiRes;
         }
+
         return 0;
     }
 }
