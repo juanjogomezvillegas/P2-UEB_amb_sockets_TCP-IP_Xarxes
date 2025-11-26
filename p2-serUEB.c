@@ -35,7 +35,7 @@ int scon;
 void aturadaS(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
-int ReadConf(char* file_cfg, char* arrel_lloc_ueb, char *TextRes);
+int ReadConf(char* file_cfg, char* arrel_lloc_ueb, int nombmaxcons, char *TextRes);
 
 int main(int argc,char *argv[]) {
     /* Senyals.                                                           */
@@ -44,12 +44,13 @@ int main(int argc,char *argv[]) {
     /* Declaració de variables                                            */
     int port_tipic;
     char arrel_lloc_ueb[10000];
+    int nombmaxcon;
     char textRes;
 
     /* Situació pre-inicial                                               */
 
     // llegeix el port típic i l'arrel del lloc UEB
-    if ((port_tipic = ReadConf(FILE_CONFIG, arrel_lloc_ueb, &textRes)) == -1) {
+    if ((port_tipic = ReadConf(FILE_CONFIG, arrel_lloc_ueb, &nombmaxcon, &textRes)) == -1) {
         port_tipic = 8000;
     }
 
@@ -190,7 +191,7 @@ void Tanca(int Sck) {
 /* Retorna:                                                               */
 /*  el port tipic llegit si tot va bé;                                    */
 /* -1 si hi ha error.                                                     */
-int ReadConf(char* file_cfg, char* arrel_lloc_ueb, char *TextRes) {
+int ReadConf(char* file_cfg, char* arrel_lloc_ueb, int nombmaxcons, char *TextRes) {
     // declaració de variables
     FILE *file;
     char line[256];
@@ -210,6 +211,8 @@ int ReadConf(char* file_cfg, char* arrel_lloc_ueb, char *TextRes) {
             sscanf(line+11, "%d", &port);
         } else if (strncmp(line, "Arrel", 5) == 0) {
             sscanf(line+6, "%s", arrel_lloc_ueb);
+        } else if (strncmp(line, "nombmaxconTCP", 13)) {
+            sscanf(line+14, "%d", nombmaxcons);
         }
     }
 
