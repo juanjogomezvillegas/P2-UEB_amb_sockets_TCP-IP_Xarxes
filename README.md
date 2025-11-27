@@ -15,7 +15,7 @@ $ make ser_comp
 $ ./run.sh ser_comp
 ```
 
-o
+or
 
 ```shell
 $ gcc -o ser p3-serUEB.c p3-aUEBs.* p3-tTCP.*
@@ -35,7 +35,7 @@ $ make cli_comp
 $ ./run.sh cli_comp
 ```
 
-o
+or
 
 ```shell
 $ gcc -o cli p3-cliUEB.c p3-aUEBc.* p3-tTCP.* p3-aDNSc.*
@@ -57,7 +57,7 @@ $ make ser_exec
 $ ./run.sh ser_exec
 ```
 
-o
+or
 
 ```shell
 $ ./ser
@@ -77,7 +77,7 @@ $ make cli_exec
 $ ./run.sh cli_exec
 ```
 
-o
+or
 
 ```shell
 $ ./cli
@@ -90,9 +90,13 @@ $ ./cli
 $ make clean
 ```
 
+or
+
 ```shell
 $ ./run.sh clean
 ```
+
+or
 
 ```shell
 $ rm ser cli
