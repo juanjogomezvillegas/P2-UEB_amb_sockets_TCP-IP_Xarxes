@@ -32,6 +32,8 @@ int scon;
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
+int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck);
+int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck);
 void aturadaS(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
@@ -133,6 +135,35 @@ int main(int argc,char *argv[]) {
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer. Les seves declaracions es troben */
 /* a l'inici d'aquest fitxer.                                             */
+
+/* Donada la llista d'identificadors de sockets “LlistaSck” (de longitud  */
+/* “LongLlistaSck” sockets), hi busca una posició "lliure" (una amb un    */
+/* contingut igual a -1) i hi escriu l'identificador de socket "Sck".     */
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  0 si tot va bé;                                                       */
+/* -1 si hi ha error.                                                     */
+int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
+{
+    return 0;
+}
+
+/* Donada la llista d'identificadors de sockets “LlistaSck” (de longitud  */
+/* “LongLlistaSck” sockets), hi busca la posició on hi ha l'identificador */
+/* de socket "Sck" i la marca com "lliure" (hi escriu un contingut igual  */
+/* a -1).                                                                 */ 
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  0 si tot va bé;                                                       */
+/* -1 si hi ha error.                                                     */
+int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck)
+{
+    return 0;
+}
 
 /* Tanca els sockets oberts abans d'aturar l'execució del S suaument.     */
 /*                                                                        */

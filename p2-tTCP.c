@@ -247,6 +247,23 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
     return 0;
 }
 
+/* Examina simultàniament durant "Temps" (en [ms]) els sockets (poden ser */
+/* TCP, UDP i teclat -stdin-) amb identificadors en la llista “LlistaSck” */
+/* (de longitud “LongLlistaSck” sockets) per saber si hi ha arribat       */
+/* alguna cosa per ser llegida. Si Temps és -1, s'espera indefinidament   */
+/* fins que arribi alguna cosa.                                           */
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  l'identificador del socket a través del qual ha arribat alguna cosa;  */
+/*  -1 si hi ha error;                                                    */
+/*  -2 si passa "Temps" sense que arribi res.                             */
+int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int Temps)
+{
+	return 0;
+}
+
 /* Obté un missatge de text de l'S.O. que descriu l'error produït en      */
 /* la darrera crida de sockets TCP, i omple "CodiRes" amb la variable     */
 /* errno de l'S.O., un codi identificador d'aquest missatge de text       */

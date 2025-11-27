@@ -188,6 +188,25 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
     return 0;
 }
 
+/* Examina simultàniament i sense límit de temps (una espera indefinida)  */
+/* els sockets (poden ser TCP, UDP i  teclat -stdin-) amb identificadors  */
+/* en la llista “LlistaSck” (de longitud “LongLlistaSck” sockets) per     */
+/* saber si hi ha arribat alguna cosa per ser llegida, excepte aquells    */
+/* que tinguin identificadors igual a -1.                                 */
+/* Escriu un text que descriu el resultat de la funció a "TextRes".       */
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/* "TextRes" és un "string" de C (vector de chars imprimibles acabat en   */
+/* '\0') d'una longitud màxima de 200 chars (incloent '\0').              */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  l'identificador del socket a través del qual ha arribat alguna cosa;  */
+/*  -1 si hi ha error.                                                    */
+int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, char *TextRes)
+{
+	return T_HaArribatAlgunaCosaPerLlegir(LlistaSck, LongLlistaSck, -1);
+}
+
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer. Les seves declaracions es        */
 /* troben a l'inici d'aquest fitxer.                                      */

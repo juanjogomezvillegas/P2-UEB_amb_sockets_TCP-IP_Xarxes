@@ -22,3 +22,4 @@ int UEBs_AcceptaConnexio(int SckEsc, char *TextRes);
 int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *arrelLlocUeb, char *TextRes);
 int UEBs_TancaConnexio(int SckCon, char *TextRes);
 int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPrem, int *portTCPrem, char *TextRes);
+int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, char *TextRes);

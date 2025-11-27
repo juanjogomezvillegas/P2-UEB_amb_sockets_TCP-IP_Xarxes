@@ -15,6 +15,7 @@
 /* Inclusió de llibreries, p.e. #include <stdio.h> o #include "meu.h"     */
 
 #include "p2-aUEBc.h"
+#include "p3-aDNSc.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -34,6 +35,7 @@ int SckCon;                             // socket de connexió global per gestio
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
+int desferURI(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx);
 void aturadaC(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
@@ -174,6 +176,25 @@ int main(int argc,char *argv[]) {
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer. Les seves declaracions es troben */
 /* a l'inici d'aquest fitxer.                                             */
+
+/* Desfà l'URI "uri" en les seves parts: l'esquema (protocol) "esq", el   */
+/* nom DNS (o l'@IP) "nom_host", el número de port "port" i el nom del    */
+/* fitxer "nom_fitxer".                                                   */
+/*                                                                        */
+/* L'URI ha de tenir la forma "esq://nom_host:port/nom_fitxer" o bé       */
+/* sense el número de port "esq://nom_host/nom_fitxer", i llavors port    */
+/* s'emplena amb el valor 0 (la resta de casos no es contemplen).         */
+/*                                                                        */
+/* "uri", "esq", "nom_host" i "nom_fitxer" són "strings" de C (vector de  */
+/* chars imprimibles acabat en '\0') d'una longitud suficient.            */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  el nombre de parts de l'URI que s'han assignat (4 si l'URI tenia      */
+/*  número de port o 3 si no en tenia).                                   */
+int desferURI(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx)
+{
+    return 0;
+}
 
 /* Tanca els sockets oberts abans d'aturar l'execució del C suaument.     */
 /*                                                                        */

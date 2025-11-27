@@ -27,6 +27,7 @@ int TCP_Rep(int Sck, char *SeqBytes, int LongSeqBytes);
 int TCP_TancaSock(int Sck);
 int TCP_TrobaAdrSockLoc(int Sck, char *IPloc, int *portTCPloc);
 int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem);
+int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int Temps);
 char* T_ObteTextRes(int *CodiRes);
 
 /* int TCP_FuncioExterna(arg1, arg2...);                                  */
