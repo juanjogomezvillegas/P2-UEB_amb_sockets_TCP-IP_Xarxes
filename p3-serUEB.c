@@ -14,7 +14,7 @@
 
 /* Inclusió de llibreries, p.e. #include <stdio.h> o #include "meu.h"     */
 
-#include "p2-aUEBs.h"
+#include "p3-aUEBs.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -23,7 +23,7 @@
 
 /* Definició de constants, p.e.,                                          */
 
-#define FILE_CONFIG "p2-serUEB.cfg"
+#define FILE_CONFIG "p3-serUEB.cfg"
 
 /* Definició de variables globals, p.e.,                                  */
 int sesc;
@@ -37,7 +37,7 @@ int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck);
 void aturadaS(int signal);
 int exitError(char* textRes);
 void Tanca(int Sck);
-int ReadConf(char* file_cfg, char* arrel_lloc_ueb, int nombmaxcons, char *TextRes);
+int ReadConf(char* file_cfg, char* arrel_lloc_ueb, int* nombmaxcons, char *TextRes);
 
 int main(int argc,char *argv[]) {
     /* Senyals.                                                           */
@@ -217,12 +217,12 @@ void Tanca(int Sck) {
 /* i el retorna.                                                          */
 /*                                                                        */
 /* Paràmetre file_cfg, correspon a un string que conté el nom del fitxer  */
-/* p2-serUEB.cfg, o un altre nom amb extensió .cfg                        */
+/* p3-serUEB.cfg, o un altre nom amb extensió .cfg                        */
 /*                                                                        */
 /* Retorna:                                                               */
 /*  el port tipic llegit si tot va bé;                                    */
 /* -1 si hi ha error.                                                     */
-int ReadConf(char* file_cfg, char* arrel_lloc_ueb, int nombmaxcons, char *TextRes) {
+int ReadConf(char* file_cfg, char* arrel_lloc_ueb, int* nombmaxcons, char *TextRes) {
     // declaració de variables
     FILE *file;
     char line[256];

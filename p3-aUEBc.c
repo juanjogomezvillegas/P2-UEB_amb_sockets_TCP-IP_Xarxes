@@ -15,7 +15,7 @@
 /*  (si les funcions externes es cridessin entre elles, faria falta fer   */
 /*   un #include del propi fitxer capçalera)                              */
 
-#include "p2-tTCP.h"
+#include "p3-tTCP.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

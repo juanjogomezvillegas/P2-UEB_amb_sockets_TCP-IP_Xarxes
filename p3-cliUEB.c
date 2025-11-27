@@ -14,7 +14,7 @@
 
 /* Inclusió de llibreries, p.e. #include <stdio.h> o #include "meu.h"     */
 
-#include "p2-aUEBc.h"
+#include "p3-aUEBc.h"
 #include "p3-aDNSc.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -26,7 +26,7 @@
 
 /* Definició de constants, p.e.,                                          */
 
-#define FILE_CONFIG "p2-serUEB.cfg"
+#define FILE_CONFIG "p3-serUEB.cfg"
 
 /* Definició de constants, p.e.,                                          */
 
