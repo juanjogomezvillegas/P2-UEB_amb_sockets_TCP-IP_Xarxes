@@ -2,28 +2,98 @@
 
 ## Deployment
 
-Màquina 1:
+Machine 1:
 
 ```shell
-$ gcc -o cli p2-cliUEB.c p2-aUEBc.* p2-tTCP.*
+$ make ser_comp
 ```
 
-Màquina 2:
+<details>
+    <summary>Other orders</summary>
 
 ```shell
-$ gcc -o ser p2-serUEB.c p2-aUEBs.* p2-tTCP.*
+$ ./run.sh ser_comp
 ```
+
+o
+
+```shell
+$ gcc -o ser p3-serUEB.c p3-aUEBs.* p3-tTCP.*
+```
+</details>
+
+Machine 2:
+
+```shell
+$ make cli_comp
+```
+
+<details>
+    <summary>Other orders</summary>
+
+```shell
+$ ./run.sh cli_comp
+```
+
+o
+
+```shell
+$ gcc -o cli p3-cliUEB.c p3-aUEBc.* p3-tTCP.* p3-aDNSc.*
+```
+</details>
 
 ## Run
 
-Màquina 1:
+Machine 1:
+
+```shell
+$ make ser_exec
+```
+
+<details>
+    <summary>Other orders</summary>
+
+```shell
+$ ./run.sh ser_exec
+```
+
+o
+
+```shell
+$ ./ser
+```
+</details>
+
+Machine 2:
+
+```shell
+$ make cli_exec
+```
+
+<details>
+    <summary>Other orders</summary>
+
+```shell
+$ ./run.sh cli_exec
+```
+
+o
 
 ```shell
 $ ./cli
 ```
+</details>
 
-Màquina 2:
+## Remove files
 
 ```shell
-$ ./ser
+$ make clean
+```
+
+```shell
+$ ./run.sh clean
+```
+
+```shell
+$ rm ser cli
 ```
