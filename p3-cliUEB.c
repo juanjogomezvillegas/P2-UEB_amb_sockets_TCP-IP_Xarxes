@@ -59,6 +59,8 @@ int main(int argc,char *argv[]) {
     bool sortir, connexioIgual = false;
     while (!sortir) {
         // variables per obtenir el fitxer
+        char uri[100];
+        char esq[100];
         char nomFitxer[100];
         char Fitxer[10000];   // buffer per rebre el fitxer
         int longFitxer;
@@ -81,38 +83,28 @@ int main(int argc,char *argv[]) {
             /* El C crea el seu socket en un #port TCP qualsevol i, demana al S la connexió TCP */
             connexioIgual = false;
             do {
-                // demana la IP del servidor
-                printf("Entra l'@IP del servidor UEB: \n");
-                scanf("%63s", ipSer);
-                // demana la port del servidor
-                printf("Entra el #Port del servidor UEB [0 pel port típic]: \n");
-                scanf("%d", &portSer);
-                if (portSer == 0) { // si entra 0 assigna el port típic
+                // demana la URI, p.e. pueb://hostname:port/fitxer o pueb://hostname/fitxer
+                printf("URI: ");
+                scanf("%s",uri);
+                desferURI(uri,esq,ipSer,&portSer,nomFitxer);
+
+                if (portSer == 0) { // si és 0 assigna el port típic
                     portSer = port_tipic;
                 }
+
                 if (SckCon > 0 && memcmp(ipSer, vellaIpSer, sizeof(ipSer)) == 0 && portSer == vellPortSer) {
                     connexioIgual = true;
-                } 
-                else {
+                } else {
+                    /* tanca la connexió TCP establerta                                                   */
                     if (SckCon > 0) {
                         Tanca(SckCon);
                     }
+                    /* dins la connexió TCP establerta, el C envia al S la petició UEB                    */
                     if ((SckCon = UEBc_DemanaConnexio(ipSer, portSer, &textRes)) == -1) {
                         printf("%s\n", &textRes);
                     }
                 }
             } while (SckCon == -1);
-
-            /* dins la connexió TCP establerta, el C envia al S la petició UEB                    */
-
-            do {
-                // demana el nom del fitxer que vol obtenir del servidor
-                printf("Entra el nom d'un fitxer [ha de començar per \"/\"]: \n");
-                scanf("%255s", nomFitxer);
-                if (nomFitxer[0] != '/') {
-                    perror("El nom d'un fitxer ha de començar per \"/\".\n");
-                }
-            } while (nomFitxer[0] != '/');
 
             if (UEBc_TrobaAdrSckConnexio(SckCon, IPloc, &portloc, IPrem, &portrem, &textRes) == -1) {
                 Tanca(SckCon);
@@ -193,7 +185,31 @@ int main(int argc,char *argv[]) {
 /*  número de port o 3 si no en tenia).                                   */
 int desferURI(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx)
 {
-    return 0;
+    // declaració de variables
+    int nassignats;
+    char port_str[100];
+
+    // valors per defecte
+    strcpy(esq, "");
+    strcpy(nom_host, "");
+    *port = 0;
+    strcpy(nom_fitx, "");
+
+    // desfem la URI
+    nassignats = sscanf(uri,"%[^:]://%[^:]:%[^/]%s",esq,nom_host,port_str,nom_fitx);
+
+    if (nassignats == 4) { // URIs amb #port
+        *port = atoi(port_str);
+        return nassignats;
+    }
+    
+    if (nassignats == 2) { // URIs sense #port, llavors port = 0 i una nova assignació
+        *port = 0;
+        nassignats = sscanf(uri,"%[^:]://%[^/]%s",esq,nom_host,nom_fitx);
+        return nassignats;
+    }
+
+    return nassignats;
 }
 
 /* Tanca els sockets oberts abans d'aturar l'execució del C suaument.     */
