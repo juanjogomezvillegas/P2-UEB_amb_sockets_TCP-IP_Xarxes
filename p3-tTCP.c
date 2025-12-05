@@ -261,6 +261,10 @@ int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem)
 /*  -2 si passa "Temps" sense que arribi res.                             */
 int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int Temps)
 {
+    //struct timeval timeout = Temps;
+
+    //select()
+
 	return 0;
 }
 

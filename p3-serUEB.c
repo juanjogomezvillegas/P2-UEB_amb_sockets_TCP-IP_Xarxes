@@ -26,6 +26,8 @@
 #define FILE_CONFIG "p3-serUEB.cfg"
 
 /* Definició de variables globals, p.e.,                                  */
+int LongLlistaSockets;
+int *LlistaSockets;
 int sesc;
 int scon;
 
@@ -60,7 +62,20 @@ int main(int argc,char *argv[]) {
         exit(exitError(&textRes));
     }
 
+    /* La variable LongLlistaSockets pren el valor del nombre màxim de connexions          */
+    LongLlistaSockets = nombmaxcon;
+
+    if ((LlistaSockets = (int *) malloc(LongLlistaSockets * sizeof(int))) == NULL) {
+        printf("malloc(), memòria no assignada\n");
+        exit(-1);
+    }
+
     printf("\nServidor UEB iniciat al #Port=%d.\n", port_tipic);
+
+    if (AfegeixSck(sesc, LlistaSockets, LongLlistaSockets) == -1) {
+        printf("AfegeixSck(), error en afegir el socker d'escolta\n");
+        exit(-1);
+    }
 
     /* Situació inicial                                                   */
 
@@ -72,6 +87,8 @@ int main(int argc,char *argv[]) {
         char tipus[4];
 
         printf("\n...Esperant peticions, clients veniu amb mi...\n");
+
+        //UEBs_HaArribatAlgunaCosaPerLlegir(LlistaSockets, LongLlistaSockets, &textRes);
 
         // Espera a rebre connexions, i quan li arriba una l'accepta
         if ((scon = UEBs_AcceptaConnexio(sesc, &textRes)) == -1) {
@@ -129,6 +146,7 @@ int main(int argc,char *argv[]) {
         exit(exitError(&textRes));
     }
 
+    free(LlistaSockets);
     exit(0);
 }
 
@@ -182,6 +200,12 @@ void aturadaS(int signal) {
         Tanca(scon);
 
         printf("socket de connexió tancat correctament...\n"); // informa a l'usuari per pantalla
+    }
+
+    if (LlistaSockets != NULL) {
+        free(LlistaSockets); // allibera la memòria assignada
+
+        printf("allibera la memòria assignada...\n"); // informa a l'usuari per pantalla
     }
 
     printf("\nFI del programa.\n"); // informa a l'usuari per pantalla de què s'ha aturat l'execució del S
