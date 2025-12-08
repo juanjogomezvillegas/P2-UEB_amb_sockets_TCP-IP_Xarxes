@@ -204,7 +204,18 @@ int UEBs_TrobaAdrSckConnexio(int SckCon, char *IPloc, int *portTCPloc, char *IPr
 /*  -1 si hi ha error.                                                    */
 int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, char *TextRes)
 {
-	return T_HaArribatAlgunaCosaPerLlegir(LlistaSck, LongLlistaSck, -1);
+	int res = T_HaArribatAlgunaCosaPerLlegir(LlistaSck, LongLlistaSck, -1);
+
+    if (res == -1) {
+        sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): Hi ha hagut algun error amb el select\n");
+        return -1;
+    } else if (res == -2) {
+        sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): Temps esgotat sense rebre dades\n");
+        return -2;
+    }
+    
+    sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): S'ha rebut dades del socket %d\n", res);
+    return res;
 }
 
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
