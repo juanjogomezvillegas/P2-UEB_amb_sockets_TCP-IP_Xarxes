@@ -268,11 +268,13 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
 
     FD_ZERO(&conjuntSckLectura); // reseteja el conjunt
 
-    for (int i = 0; i < LongLlistaSck; i++) {
+    int i = 0;
+    while (i < LongLlistaSck) {
         FD_SET(LlistaSck[i], &conjuntSckLectura); // afegeix cada socket al conjunt
         if (LlistaSck[i] > max_fd) {
             max_fd = LlistaSck[i]; // actualitza el màxim fd
         }
+        i++;
     }
 
     // configurem el timeout
@@ -290,11 +292,12 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
         return -2; // Temps esgotat sense dades
     }
     
-    for (int i = 0; i < LongLlistaSck; i++) {
+    i = 0;
+    while (i < LongLlistaSck) {
         if (FD_ISSET(LlistaSck[i], &conjuntSckLectura)) {
             return LlistaSck[i]; // retorna el socket que té dades
         }
-        
+        i++;
     }
     
 	return -2; // No s'ha trobat cap socket amb dades

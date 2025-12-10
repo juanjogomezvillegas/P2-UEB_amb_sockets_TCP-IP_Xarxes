@@ -65,7 +65,7 @@ int main(int argc,char *argv[]) {
     }
 
     /* La variable LongLlistaSockets pren el valor del nombre màxim de connexions          */
-    LongLlistaSockets = nombmaxcon;
+    LongLlistaSockets = nombmaxcon+1;
     NumSocketsScon = 0;
     sescALaLlista = false;
 
@@ -85,7 +85,7 @@ int main(int argc,char *argv[]) {
         int retornPeticio;
         char tipus[4];
 
-        if (NumSocketsScon-1 == LongLlistaSockets-1) { // si s'ha superat el limit de sockets scon, traiem el sesc
+        if (NumSocketsScon == LongLlistaSockets-1) { // si s'ha superat el limit de sockets scon, traiem el sesc
             sescALaLlista = false;
             TreuSck(sesc, LlistaSockets, LongLlistaSockets); // si no hi és només retornarà -1
         } else { // si és pot, afegim el sesc a la llista si encara no ho estava
@@ -107,7 +107,7 @@ int main(int argc,char *argv[]) {
         }
 
         if (scon == sesc) { // L'arriba una petició, via sesc
-            if (NumSocketsScon-1 < LongLlistaSockets-1) { // si és pot, afegim el nou scon a la llista
+            if (NumSocketsScon < LongLlistaSockets-1) { // si és pot, afegim el nou scon a la llista
                 int newScon;
                 if ((newScon = UEBs_AcceptaConnexio(scon, &textRes)) == -1) {
                     Tanca(sesc);
@@ -121,6 +121,7 @@ int main(int argc,char *argv[]) {
                     Tanca(newScon);
                     exit(exitError(&textRes));
                 }
+                NumSocketsScon++;
                 Tanca(newScon);
             }
         } else { // via scon_i
@@ -160,6 +161,7 @@ int main(int argc,char *argv[]) {
                         }
                     } else { // si el C és desconnecta o tanca la connexió
                         printf("\nC desconnectat\n");
+                        TreuSck(scon, LlistaSockets, LongLlistaSockets);
                         memset(nomFitxer, 0, sizeof(nomFitxer));
                     }
                 }
@@ -197,12 +199,13 @@ int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck) {
     bool correcte = false;
     
     // busquem un lloc lliure pel socket a la llista
-    for (int i = 0; i < LongLlistaSck; i++) {
+    int i = 0;
+    while (i < LongLlistaSck && !correcte) {
         if (LlistaSck[i] == -1) {
             LlistaSck[i] = Sck;
-            NumSocketsScon++;
             correcte = true;
         }
+        i++;
     }
 
     // Si tot bé, 0; altrament -1
@@ -225,12 +228,13 @@ int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck) {
     bool correcte = false;
 
     // busquem el socket a la llista i el marquem com a lliure
-    for (int i = 0; i < LongLlistaSck; i++) {
+    int i = 0;
+    while (i < LongLlistaSck && !correcte) {
         if (LlistaSck[i] == Sck) {
             LlistaSck[i] = -1;
-            NumSocketsScon--;
             correcte = true;
         }
+        i++;
     }
 
     // Si tot bé, 0; altrament -1

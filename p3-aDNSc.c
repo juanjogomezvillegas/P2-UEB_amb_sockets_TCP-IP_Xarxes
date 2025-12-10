@@ -18,7 +18,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <resolver.h>
+#include <sys/types.h>
+#include <netdb.h>
 
 /* Definició de constants, p.e.,                                          */
 
@@ -28,7 +29,7 @@
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
 
-int extreureAddr(const char **NomDNS, char **IP);
+int extreureAddr(const char *NomDNS, char *IP);
 
 /* Definició de funcions EXTERNES, és a dir, d'aquelles que es cridaran   */
 /* des d'altres fitxers, p.e., int DNSc_FuncioExterna(arg1, arg2...) { }  */
@@ -50,7 +51,7 @@ int extreureAddr(const char **NomDNS, char **IP);
 /* -1 si hi ha un error.                                                  */
 int DNSc_ResolDNSaIP(const char *NomDNS, char *IP, char *TextRes)
 {
-    if(extreureAddr(&NomDNS, &IP) == -1){
+    if(extreureAddr(NomDNS, IP) == -1){
         sprintf(TextRes, "Error en Extreure l'IP del NomDNS: %d", NomDNS);
         return -1;
     }
@@ -63,12 +64,12 @@ int DNSc_ResolDNSaIP(const char *NomDNS, char *IP, char *TextRes)
 
 /* Aquesta funció extreu l'adreça IP corresponent al nom DNS passat com  */
 /* a paràmetre.                                                          */
-int extreureAddr(char *NomDNS, char *IP){
-    char *addr;
+int extreureAddr(const char *NomDNS, char *IP) {
+    /*char *addr;
     addr = resolver(NomDNS);
     if(addr == NULL){
         return -1;
     }
-    strcpy(IP, addr);
+    strcpy(IP, addr);*/
     return 0;
 }
