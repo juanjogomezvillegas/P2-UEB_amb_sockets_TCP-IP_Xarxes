@@ -27,6 +27,8 @@
 
 /* Definició de variables globals, p.e.,                                  */
 int LongLlistaSockets;
+int NumSocketsScon;
+bool sescALaLlista;
 int *LlistaSockets;
 int sesc;
 int scon;
@@ -64,6 +66,8 @@ int main(int argc,char *argv[]) {
 
     /* La variable LongLlistaSockets pren el valor del nombre màxim de connexions          */
     LongLlistaSockets = nombmaxcon;
+    NumSocketsScon = 0;
+    sescALaLlista = false;
 
     if ((LlistaSockets = (int *) malloc(LongLlistaSockets * sizeof(int))) == NULL) {
         printf("malloc(), memòria no assignada\n");
@@ -71,11 +75,6 @@ int main(int argc,char *argv[]) {
     }
 
     printf("\nServidor UEB iniciat al #Port=%d.\n", port_tipic);
-
-    if (AfegeixSck(sesc, LlistaSockets, LongLlistaSockets) == -1) {
-        printf("AfegeixSck(), error en afegir el socker d'escolta\n");
-        exit(-1);
-    }
 
     /* Situació inicial                                                   */
 
@@ -86,53 +85,83 @@ int main(int argc,char *argv[]) {
         int retornPeticio;
         char tipus[4];
 
+        if (NumSocketsScon-1 == LongLlistaSockets-1) { // si s'ha superat el limit de sockets scon, traiem el sesc
+            sescALaLlista = false;
+            TreuSck(sesc, LlistaSockets, LongLlistaSockets); // si no hi és només retornarà -1
+        } else { // si és pot, afegim el sesc a la llista si encara no ho estava
+            if (!sescALaLlista) {
+                if (AfegeixSck(sesc, LlistaSockets, LongLlistaSockets) == -1) {
+                    printf("AfegeixSck(), error en afegir el socker d'escolta\n");
+                    exit(-1);
+                }
+                sescALaLlista = true;
+            }
+        }
+
         printf("\n...Esperant peticions, clients veniu amb mi...\n");
 
-        //UEBs_HaArribatAlgunaCosaPerLlegir(LlistaSockets, LongLlistaSockets, &textRes);
-
-        // Espera a rebre connexions, i quan li arriba una l'accepta
-        if ((scon = UEBs_AcceptaConnexio(sesc, &textRes)) == -1) {
+        // Escolta si hi ha alguna cosa per llegir
+        if ((scon = UEBs_HaArribatAlgunaCosaPerLlegir(LlistaSockets, LongLlistaSockets, &textRes)) == -1) {
             Tanca(sesc);
             exit(exitError(&textRes));
         }
 
-        // troba les adreces locals i remotes del socket de connexió
-        if (UEBs_TrobaAdrSckConnexio(scon, iploc, &portloc, iprem, &portrem, &textRes) == -1) {
-            Tanca(sesc);
-            Tanca(scon);
-            exit(exitError(&textRes));
-        }
+        if (scon == sesc) { // L'arriba una petició, via sesc
+            if (NumSocketsScon-1 < LongLlistaSockets-1) { // si és pot, afegim el nou scon a la llista
+                int newScon;
+                if ((newScon = UEBs_AcceptaConnexio(scon, &textRes)) == -1) {
+                    Tanca(sesc);
+                    Tanca(scon);
+                    exit(exitError(&textRes));
+                }
 
-        // mostra les adreces
-        printf("\nSocket local @IP=%s;#port=%d.\nS'ha connectat un C amb @IP=%s;#port=%d.\n", iploc, portloc, iprem, portrem);
-
-        /* Comença a servir la petició                                      */
-
-        retornPeticio = 0;
-        while (retornPeticio != -3 && retornPeticio != -2) {
-            // rep i serveix la petició
-            if ((retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, arrel_lloc_ueb, &textRes)) == -1) {
+                if (AfegeixSck(newScon, LlistaSockets, LongLlistaSockets) == -1) {
+                    Tanca(sesc);
+                    Tanca(scon);
+                    Tanca(newScon);
+                    exit(exitError(&textRes));
+                }
+                Tanca(newScon);
+            }
+        } else { // via scon_i
+            // troba les adreces locals i remotes del socket de connexió
+            if (UEBs_TrobaAdrSckConnexio(scon, iploc, &portloc, iprem, &portrem, &textRes) == -1) {
                 Tanca(sesc);
                 Tanca(scon);
                 exit(exitError(&textRes));
             }
 
-            if (retornPeticio == -2) { // si la petició tenia un fitxer massa gran o un tipus de missatge incorrecte
-                printf("\nError fitxer massa gran o tipus de missatge incorrecte. %s\n", &textRes);
-            } else { // altrament
-                if (retornPeticio != -3) { // si el C encara no s'ha des connectat
-                    if (retornPeticio == 0) { // si el fitxer existeix al S
-                        // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-                        printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
-                    } else if (retornPeticio == 1) { // si el fitxer no exiteix al S
-                        // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-                        printf("\nerror, fitxer %s no trobat, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
-                    } else { // altres errors
-                        printf("\n%s\n", &textRes);
+            // mostra les adreces
+            printf("\nSocket local @IP=%s;#port=%d.\nS'ha connectat un C amb @IP=%s;#port=%d.\n", iploc, portloc, iprem, portrem);
+
+            /* Comença a servir la petició                                      */
+
+            retornPeticio = 0;
+            while (retornPeticio != -3 && retornPeticio != -2) {
+                // rep i serveix la petició
+                if ((retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, arrel_lloc_ueb, &textRes)) == -1) {
+                    Tanca(sesc);
+                    Tanca(scon);
+                    exit(exitError(&textRes));
+                }
+
+                if (retornPeticio == -2) { // si la petició tenia un fitxer massa gran o un tipus de missatge incorrecte
+                    printf("\nError fitxer massa gran o tipus de missatge incorrecte. %s\n", &textRes);
+                } else { // altrament
+                    if (retornPeticio != -3) { // si el C encara no s'ha des connectat
+                        if (retornPeticio == 0) { // si el fitxer existeix al S
+                            // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                            printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
+                        } else if (retornPeticio == 1) { // si el fitxer no exiteix al S
+                            // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                            printf("\nerror, fitxer %s no trobat, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
+                        } else { // altres errors
+                            printf("\n%s\n", &textRes);
+                        }
+                    } else { // si el C és desconnecta o tanca la connexió
+                        printf("\nC desconnectat\n");
+                        memset(nomFitxer, 0, sizeof(nomFitxer));
                     }
-                } else { // si el C és desconnecta o tanca la connexió
-                    printf("\nC desconnectat\n");
-                    memset(nomFitxer, 0, sizeof(nomFitxer));
                 }
             }
         }
@@ -163,9 +192,22 @@ int main(int argc,char *argv[]) {
 /* Retorna:                                                               */
 /*  0 si tot va bé;                                                       */
 /* -1 si hi ha error.                                                     */
-int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
-{
-    return 0;
+int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck) {
+    // declaració de variables
+    bool correcte = false;
+    
+    // busquem un lloc lliure pel socket a la llista
+    for (int i = 0; i < LongLlistaSck; i++) {
+        if (LlistaSck[i] == -1) {
+            LlistaSck[i] = Sck;
+            NumSocketsScon++;
+            correcte = true;
+        }
+    }
+
+    // Si tot bé, 0; altrament -1
+    if (correcte) return 0;
+    else return -1;
 }
 
 /* Donada la llista d'identificadors de sockets “LlistaSck” (de longitud  */
@@ -178,9 +220,22 @@ int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck)
 /* Retorna:                                                               */
 /*  0 si tot va bé;                                                       */
 /* -1 si hi ha error.                                                     */
-int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck)
-{
-    return 0;
+int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck) {
+    // declaració de variables
+    bool correcte = false;
+
+    // busquem el socket a la llista i el marquem com a lliure
+    for (int i = 0; i < LongLlistaSck; i++) {
+        if (LlistaSck[i] == Sck) {
+            LlistaSck[i] = -1;
+            NumSocketsScon--;
+            correcte = true;
+        }
+    }
+
+    // Si tot bé, 0; altrament -1
+    if (correcte) return 0;
+    else return -1;
 }
 
 /* Tanca els sockets oberts abans d'aturar l'execució del S suaument.     */
