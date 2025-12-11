@@ -99,10 +99,12 @@ int main(int argc,char *argv[]) {
                     if (SckCon > 0) {
                         Tanca(SckCon);
                     }
+                    printf("\ndemano connexio a %s:%d\n", ipSer, portSer);
                     /* dins la connexió TCP establerta, el C envia al S la petició UEB                    */
                     if ((SckCon = UEBc_DemanaConnexio(ipSer, portSer, &textRes)) == -1) {
                         printf("%s\n", &textRes);
                     }
+                    printf("\nja m'he connectat\n");
                 }
             } while (SckCon == -1);
 

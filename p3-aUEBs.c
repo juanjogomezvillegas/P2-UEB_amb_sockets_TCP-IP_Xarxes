@@ -211,7 +211,7 @@ int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, c
         return -1;
     } else if (res == -2) {
         sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): Temps esgotat sense rebre dades\n");
-        return -2;
+        return -1;
     }
     
     sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): S'ha rebut dades del socket %d\n", res);

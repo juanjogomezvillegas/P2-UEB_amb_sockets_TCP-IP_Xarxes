@@ -270,9 +270,11 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
 
     int i = 0;
     while (i < LongLlistaSck) {
-        FD_SET(LlistaSck[i], &conjuntSckLectura); // afegeix cada socket al conjunt
-        if (LlistaSck[i] > max_fd) {
-            max_fd = LlistaSck[i]; // actualitza el màxim fd
+        if (LlistaSck[i] >= 0) {
+            FD_SET(LlistaSck[i], &conjuntSckLectura); // afegeix cada socket al conjunt
+            if (LlistaSck[i] > max_fd) {
+                max_fd = LlistaSck[i]; // actualitza el màxim fd
+            }            
         }
         i++;
     }
@@ -281,6 +283,10 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
     if (Temps >= 0) {
         timeout.tv_sec = Temps / 1000; // segons
         timeout.tv_usec = (Temps % 1000) * 1000; // microsegons
+    }
+
+    if (max_fd < 0) {
+        return -2;
     }
 
     // amb el select, esperem a que arribi alguna dada
@@ -292,15 +298,17 @@ int T_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, int 
         return -2; // Temps esgotat sense dades
     }
     
+    int sck = -1;
     i = 0;
     while (i < LongLlistaSck) {
         if (FD_ISSET(LlistaSck[i], &conjuntSckLectura)) {
-            return LlistaSck[i]; // retorna el socket que té dades
+            sck = LlistaSck[i]; // retorna el socket que té dades
         }
         i++;
     }
     
-	return -2; // No s'ha trobat cap socket amb dades
+    if (sck == -1) return -2; // No s'ha trobat cap socket amb dades
+    else return sck;
 }
 
 /* Obté un missatge de text de l'S.O. que descriu l'error produït en      */

@@ -36,6 +36,7 @@ int scon;
 /* Declaració de funcions INTERNES que es fan servir en aquest fitxer     */
 /* (les  definicions d'aquestes funcions es troben més avall) per així    */
 /* fer-les conegudes des d'aquí fins al final d'aquest fitxer, p.e.,      */
+int initLlista(int* LlistaSck, int LongLlistaSck);
 int AfegeixSck(int Sck, int *LlistaSck, int LongLlistaSck);
 int TreuSck(int Sck, int *LlistaSck, int LongLlistaSck);
 void aturadaS(int signal);
@@ -69,10 +70,18 @@ int main(int argc,char *argv[]) {
     NumSocketsScon = 0;
     sescALaLlista = false;
 
+    // creem i inicialitzem la llista de sockets, sense cap socket
     if ((LlistaSockets = (int *) malloc(LongLlistaSockets * sizeof(int))) == NULL) {
         printf("malloc(), memòria no assignada\n");
         exit(-1);
     }
+    initLlista(LlistaSockets, LongLlistaSockets);
+
+    // Afegim el sesc a la llista
+    /*if (AfegeixSck(sesc, LlistaSockets, LongLlistaSockets) == -1) {
+        printf("AfegeixSck(), error en afegir el socker d'escolta\n");
+        exit(-1);
+    }*/
 
     printf("\nServidor UEB iniciat al #Port=%d.\n", port_tipic);
 
@@ -85,7 +94,7 @@ int main(int argc,char *argv[]) {
         int retornPeticio;
         char tipus[4];
 
-        if (NumSocketsScon == LongLlistaSockets-1) { // si s'ha superat el limit de sockets scon, traiem el sesc
+        if (NumSocketsScon == nombmaxcon) { // si s'ha superat el limit de sockets scon, traiem el sesc
             sescALaLlista = false;
             TreuSck(sesc, LlistaSockets, LongLlistaSockets); // si no hi és només retornarà -1
         } else { // si és pot, afegim el sesc a la llista si encara no ho estava
@@ -107,22 +116,20 @@ int main(int argc,char *argv[]) {
         }
 
         if (scon == sesc) { // L'arriba una petició, via sesc
-            if (NumSocketsScon < LongLlistaSockets-1) { // si és pot, afegim el nou scon a la llista
+            if (NumSocketsScon < nombmaxcon) { // si és pot, afegim el nou scon a la llista
                 int newScon;
                 if ((newScon = UEBs_AcceptaConnexio(scon, &textRes)) == -1) {
                     Tanca(sesc);
-                    Tanca(scon);
                     exit(exitError(&textRes));
                 }
 
+                printf("accepto %d, escolto des de %d\n", newScon, sesc);
+
                 if (AfegeixSck(newScon, LlistaSockets, LongLlistaSockets) == -1) {
                     Tanca(sesc);
-                    Tanca(scon);
-                    Tanca(newScon);
                     exit(exitError(&textRes));
                 }
                 NumSocketsScon++;
-                Tanca(newScon);
             }
         } else { // via scon_i
             // troba les adreces locals i remotes del socket de connexió
@@ -184,6 +191,22 @@ int main(int argc,char *argv[]) {
 /* Definició de funcions INTERNES, és a dir, d'aquelles que es faran      */
 /* servir només en aquest mateix fitxer. Les seves declaracions es troben */
 /* a l'inici d'aquest fitxer.                                             */
+
+/* Donada una llista (de longitud “LongLlistaSck” sockets),               */
+/* hi assigna a cada posició el valor -1.                                 */
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  0 si tot va bé;                                                       */
+int initLlista(int* LlistaSck, int LongLlistaSck) {
+    int i = 0;
+    while (i < LongLlistaSck) {
+        LlistaSck[i] = -1;
+        i++;
+    }
+    return 0;
+}
 
 /* Donada la llista d'identificadors de sockets “LlistaSck” (de longitud  */
 /* “LongLlistaSck” sockets), hi busca una posició "lliure" (una amb un    */
@@ -310,6 +333,7 @@ int ReadConf(char* file_cfg, char* arrel_lloc_ueb, int* nombmaxcons, char *TextR
     FILE *file;
     char line[256];
     int port = -1;
+    int nombcons = -1;
 
     // obre el fitxer cfg
     file = fopen(file_cfg, "r");
@@ -325,10 +349,12 @@ int ReadConf(char* file_cfg, char* arrel_lloc_ueb, int* nombmaxcons, char *TextR
             sscanf(line+11, "%d", &port);
         } else if (strncmp(line, "Arrel", 5) == 0) {
             sscanf(line+6, "%s", arrel_lloc_ueb);
-        } else if (strncmp(line, "nombmaxconTCP", 13)) {
-            sscanf(line+14, "%d", nombmaxcons);
+        } else if (strncmp(line, "nombmaxconTCP", 13) == 0) {
+            sscanf(line+14, "%d", &nombcons);
         }
     }
+
+    *nombmaxcons = nombcons;
 
     return port;
 }
