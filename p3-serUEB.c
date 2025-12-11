@@ -77,12 +77,6 @@ int main(int argc,char *argv[]) {
     }
     initLlista(LlistaSockets, LongLlistaSockets);
 
-    // Afegim el sesc a la llista
-    /*if (AfegeixSck(sesc, LlistaSockets, LongLlistaSockets) == -1) {
-        printf("AfegeixSck(), error en afegir el socker d'escolta\n");
-        exit(-1);
-    }*/
-
     printf("\nServidor UEB iniciat al #Port=%d.\n", port_tipic);
 
     /* Situació inicial                                                   */
@@ -145,7 +139,7 @@ int main(int argc,char *argv[]) {
             /* Comença a servir la petició                                      */
 
             retornPeticio = 0;
-            while (retornPeticio != -3 && retornPeticio != -2) {
+            //while (retornPeticio != -3 && retornPeticio != -2) {
                 // rep i serveix la petició
                 if ((retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, arrel_lloc_ueb, &textRes)) == -1) {
                     Tanca(sesc);
@@ -172,7 +166,7 @@ int main(int argc,char *argv[]) {
                         memset(nomFitxer, 0, sizeof(nomFitxer));
                     }
                 }
-            }
+            //}
         }
     }
 
