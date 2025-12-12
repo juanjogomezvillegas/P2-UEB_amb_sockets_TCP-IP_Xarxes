@@ -207,10 +207,10 @@ int UEBs_HaArribatAlgunaCosaPerLlegir(const int *LlistaSck, int LongLlistaSck, c
 	int res = T_HaArribatAlgunaCosaPerLlegir(LlistaSck, LongLlistaSck, -1);
 
     if (res == -1) {
-        //sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): Hi ha hagut algun error amb el select\n");
+        sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): Hi ha hagut algun error amb el select\n");
         return -1;
     } else if (res == -2) {
-        //sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): Temps esgotat sense rebre dades\n");
+        sprintf(TextRes, "UEBs_HaArribatAlgunaCosaPerLlegir(): Temps esgotat sense rebre dades\n");
         return -1;
     }
     

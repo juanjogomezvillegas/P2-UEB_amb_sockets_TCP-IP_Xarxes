@@ -64,6 +64,7 @@ int main(int argc,char *argv[]) {
         char nomFitxer[100];
         char Fitxer[10000];   // buffer per rebre el fitxer
         int longFitxer;
+        char nomDNS[100];
         char IPloc[16], IPrem[16];
         int portloc, portrem;
         int retornPeticio;
@@ -86,7 +87,9 @@ int main(int argc,char *argv[]) {
                 // demana la URI, p.e. pueb://hostname:port/fitxer o pueb://hostname/fitxer
                 printf("URI: ");
                 scanf("%s",uri);
-                desferURI(uri,esq,ipSer,&portSer,nomFitxer);
+                desferURI(uri,esq,nomDNS,&portSer,nomFitxer);
+
+                DNSc_ResolDNSaIP(nomDNS, ipSer, &textRes); // resolem el nom DNS i obtenim la IP corresponent
 
                 if (portSer == 0) { // si és 0 assigna el port típic
                     portSer = port_tipic;
@@ -99,12 +102,10 @@ int main(int argc,char *argv[]) {
                     if (SckCon > 0) {
                         Tanca(SckCon);
                     }
-                    printf("\ndemano connexio a %s:%d\n", ipSer, portSer);
                     /* dins la connexió TCP establerta, el C envia al S la petició UEB                    */
                     if ((SckCon = UEBc_DemanaConnexio(ipSer, portSer, &textRes)) == -1) {
                         printf("%s\n", &textRes);
                     }
-                    printf("\nja m'he connectat\n");
                 }
             } while (SckCon == -1);
 
