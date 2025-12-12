@@ -52,7 +52,7 @@ int extreureAddr(const char *NomDNS, char *IP);
 int DNSc_ResolDNSaIP(const char *NomDNS, char *IP, char *TextRes)
 {
     if(extreureAddr(NomDNS, IP) == -1){
-        sprintf(TextRes, "Error en Extreure l'IP del NomDNS: %d", NomDNS);
+        sprintf(TextRes, "Error en Extreure l'IP del NomDNS: %s", NomDNS);
         return -1;
     }
     return 0;
