@@ -50,7 +50,7 @@ int main(int argc,char *argv[]) {
 
     /* Declaració de variables                                            */
     int port_tipic;
-    char arrel_lloc_ueb[10000];
+    char arrel_lloc_ueb[100];
     int nombmaxcon;
     char textRes;
 
