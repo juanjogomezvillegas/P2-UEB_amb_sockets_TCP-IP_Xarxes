@@ -82,6 +82,8 @@ int main(int argc,char *argv[]) {
     /* Situació inicial                                                   */
 
     for (;;) {
+        strcpy(&textRes, "");
+
         char nomFitxer[10000];
         char iprem[16], iploc[16];
         int portrem, portloc;
@@ -93,10 +95,7 @@ int main(int argc,char *argv[]) {
             TreuSck(sesc, LlistaSockets, LongLlistaSockets); // si no hi és només retornarà -1
         } else { // si és pot, afegim el sesc a la llista si encara no ho estava
             if (!sescALaLlista) {
-                if (AfegeixSck(sesc, LlistaSockets, LongLlistaSockets) == -1) {
-                    printf("AfegeixSck(), error en afegir el socker d'escolta\n");
-                    exit(-1);
-                }
+                AfegeixSck(sesc, LlistaSockets, LongLlistaSockets);
                 sescALaLlista = true;
             }
         }
@@ -104,10 +103,7 @@ int main(int argc,char *argv[]) {
         printf("\n...Esperant peticions, clients veniu amb mi...\n");
 
         // Escolta si hi ha alguna cosa per llegir
-        if ((scon = UEBs_HaArribatAlgunaCosaPerLlegir(LlistaSockets, LongLlistaSockets, &textRes)) == -1) {
-            Tanca(sesc);
-            exit(exitError(&textRes));
-        }
+        scon = UEBs_HaArribatAlgunaCosaPerLlegir(LlistaSockets, LongLlistaSockets, &textRes);
 
         if (scon == sesc) { // L'arriba una petició, via sesc
             if (NumSocketsScon < nombmaxcon) { // si és pot, afegim el nou scon a la llista
@@ -117,15 +113,10 @@ int main(int argc,char *argv[]) {
                     exit(exitError(&textRes));
                 }
 
-                printf("accepto %d, escolto des de %d\n", newScon, sesc);
-
-                if (AfegeixSck(newScon, LlistaSockets, LongLlistaSockets) == -1) {
-                    Tanca(sesc);
-                    exit(exitError(&textRes));
-                }
+                AfegeixSck(newScon, LlistaSockets, LongLlistaSockets);
                 NumSocketsScon++;
             }
-        } else { // via scon_i
+        } else if (scon >= 0) { // via scon_i
             // troba les adreces locals i remotes del socket de connexió
             if (UEBs_TrobaAdrSckConnexio(scon, iploc, &portloc, iprem, &portrem, &textRes) == -1) {
                 Tanca(sesc);
@@ -139,34 +130,35 @@ int main(int argc,char *argv[]) {
             /* Comença a servir la petició                                      */
 
             retornPeticio = 0;
-            //while (retornPeticio != -3 && retornPeticio != -2) {
-                // rep i serveix la petició
-                if ((retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, arrel_lloc_ueb, &textRes)) == -1) {
-                    Tanca(sesc);
-                    Tanca(scon);
-                    exit(exitError(&textRes));
-                }
+            // rep i serveix la petició
+            if ((retornPeticio = UEBs_ServeixPeticio(scon, tipus, nomFitxer, arrel_lloc_ueb, &textRes)) == -1) {
+                Tanca(sesc);
+                Tanca(scon);
+                exit(exitError(&textRes));
+            }
 
-                if (retornPeticio == -2) { // si la petició tenia un fitxer massa gran o un tipus de missatge incorrecte
-                    printf("\nError fitxer massa gran o tipus de missatge incorrecte. %s\n", &textRes);
-                } else { // altrament
-                    if (retornPeticio != -3) { // si el C encara no s'ha des connectat
-                        if (retornPeticio == 0) { // si el fitxer existeix al S
-                            // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-                            printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
-                        } else if (retornPeticio == 1) { // si el fitxer no exiteix al S
-                            // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
-                            printf("\nerror, fitxer %s no trobat, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
-                        } else { // altres errors
-                            printf("\n%s\n", &textRes);
-                        }
-                    } else { // si el C és desconnecta o tanca la connexió
-                        printf("\nC desconnectat\n");
-                        TreuSck(scon, LlistaSockets, LongLlistaSockets);
-                        memset(nomFitxer, 0, sizeof(nomFitxer));
+            if (retornPeticio == -2) { // si la petició tenia un fitxer massa gran o un tipus de missatge incorrecte
+                printf("\nError fitxer massa gran o tipus de missatge incorrecte. %s\n", &textRes);
+            } else { // altrament
+                if (retornPeticio != -3) { // si el C encara no s'ha des connectat
+                    if (retornPeticio == 0) { // si el fitxer existeix al S
+                        // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                        printf("\nobtenir, %s, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
+                    } else if (retornPeticio == 1) { // si el fitxer no exiteix al S
+                        // es mostra per pantalla la petició: “obtenir”, nom_fitxer, @socket (@IP:#portTCP) de C i S
+                        printf("\nerror, fitxer %s no trobat, @socket del C %s:%d, @socket del S %s:%d.\n", nomFitxer, iploc, portloc, iprem, portrem);
+                    } else { // altres errors
+                        printf("\n%s\n", &textRes);
                     }
+                } else { // si el C és desconnecta o tanca la connexió
+                    printf("\nC desconnectat\n");
+                    TreuSck(scon, LlistaSockets, LongLlistaSockets);
+                    NumSocketsScon--;
                 }
-            //}
+            }
+            memset(nomFitxer, 0, sizeof(nomFitxer));
+        } else {
+            printf("\n%s\n", &textRes);
         }
     }
 

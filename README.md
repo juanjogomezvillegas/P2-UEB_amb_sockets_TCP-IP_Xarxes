@@ -101,3 +101,8 @@ or
 ```shell
 $ rm ser cli
 ```
+
+Proves:
+
+- pueb://84.88.155.97/primera.html
+- pueb://84.88.155.97/segona.html

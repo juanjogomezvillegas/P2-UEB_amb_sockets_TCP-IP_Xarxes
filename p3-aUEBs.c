@@ -121,6 +121,8 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *arr
         return -4;
     }
 
+    memset(nomfitxer, 0, sizeof(nomfitxer)); // netejem el buffer del nom del fitxer
+
     // concatena l'arrel del lloc UEB al fitxer abans d'obrir-lo
     memcpy(nomfitxer, arrelLlocUeb, strlen(arrelLlocUeb));
     memcpy(nomfitxer + strlen(arrelLlocUeb), NomFitx, strlen(NomFitx));
